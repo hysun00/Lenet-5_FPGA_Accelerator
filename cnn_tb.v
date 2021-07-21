@@ -16,11 +16,11 @@ module cnn_tb;
   cnn cnn(
     .clk(clk),
     .rst(rst),
-    .start(),
-    .done(),
-    .BRAM_IF_ADDR(),
-    .BRAM_W_ADDR(),
-    .BRAM_TEMP_ADDR(),
+    .start(start),
+    .done(done),
+    .BRAM_IF_ADDR(BRAM_IF_ADDR),
+    .BRAM_W_ADDR(BRAM_W_ADDR),
+    .BRAM_TEMP_ADDR(BRAM_TEMP_ADDR),
     .BRAM_IF_WE(),
     .BRAM_W_WE(),
     .BRAM_TEMP_WE(),
@@ -33,40 +33,40 @@ module cnn_tb;
     .BRAM_IF_DOUT(),
     .BRAM_W_DOUT(),
     .BRAM_TEMP_DOUT(),
-    .BRAM_IF_DIN(),
-    .BRAM_W_DIN(),
+    .BRAM_IF_DIN(BRAM_IF_DIN),
+    .BRAM_W_DIN(BRAM_W_DIN),
     .BRAM_TEMP_DIN()
   );
 
   bram bram_w(
-    .clk(),
-    .rst(),
+    .clk(clk),
+    .rst(rst),
     .wen(),
-    .addr(),
+    .addr(BRAM_W_ADDR),
     .en(),
-    .dout(),
-    .din()
+    .dout(BRAM_W_DOUT),
+    .din(BRAM_W_DIN)
   );
 
 
   bram bram_tmp(
-    .clk(),
-    .rst(),
+    .clk(clk),
+    .rst(rst),
     .wen(),
-    .addr(),
+    .addr(BRAM_TEMP_ADDR),
     .en(),
-    .dout(),
-    .din()
+    .dout(BRAM_TEMP_DOUT),
+    .din(BRAM_TEMP_DIN)
   );
 
   bram bram_f(
-    .clk(),
-    .rst(),
+    .clk(clk),
+    .rst(rst),
     .wen(),
-    .addr(),
+    .addr(BRAM_IF_ADDR),
     .en(),
-    .dout(),
-    .din()
+    .dout(BRAM_IF_DOUT),
+    .din(BRAM_IF_DIN)
   );
 
   reg [7:0] GOLDEN [0:293]
@@ -79,26 +79,48 @@ module cnn_tb;
     wait(fin);
     #(`CYCLE*2)
     #20 
-    $display("\nDone\n");
+    $display("\n============ Done ===================\n");
+    $display("\n======== Check start ================\n");
     err = 0;
-    //num=6;
-    for (i = 0; i < num; i=i+1)
-    begin
-      if(M1.bram[i] !== GOLDEN[i])begin
-        $display("DM[%4d] = %h, expect = %h", i, M1.bram[i], GOLDEN[i]);
+
+    for (i = 0; i < 294; i=i+1) begin
+      if(tmp.mem[i] !== GOLDEN[i])begin
+        $display("DM[%4d] = %h, expect = %h", i, tmp.mem[i], GOLDEN[i]);
         err = err + 1;
       end
-      
-      
-      else
-      begin
-        $display("DM[%4d] = %h, pass",  i, M1.bram[i]);
+      else begin
+        $display("DM[%4d] = %h, pass",  i, tmp.mem[i]);
       end
       
     end
-    result(err, num);
+    if (err === 0) begin
+        $display("\n");
+        $display("\n");
+        $display("        ****************************               ");
+        $display("        **                        **       |\__||  ");
+        $display("        **  Congratulations !!    **      / ^.^  | ");
+        $display("        **                        **    /_____   | ");
+        $display("        **  Simulation PASS!!     **   /^ ^ ^ \\  |");
+        $display("        **                        **  |^ ^ ^ ^ |w| ");
+        $display("        ****************************   \\m___m__|_|");
+        $display("\n");
+      end
+      else begin
+        $display("\n");
+        $display("\n");
+        $display("        ****************************               ");
+        $display("        **                        **       |\__||  ");
+        $display("        **  OOPS!!                **      / X,X  | ");
+        $display("        **                        **    /_____   | ");
+        $display("        **  Simulation Failed!!   **   /^ ^ ^ \\  |");
+        $display("        **                        **  |^ ^ ^ ^ |w| ");
+        $display("        ****************************   \\m___m__|_|");
+        $display("         Totally has %d errors                     ", err); 
+        $display("\n");
+      end
     $finish;
   end
+
   always #(`CYCLE/2) clk = ~clk;
 
   initial begin
@@ -107,13 +129,15 @@ module cnn_tb;
     $readmemh("./number", GOLDEN, 0);
 	end
 
-  initial
-  begin
+  initial begin
     `ifdef FSDB
     $fsdbDumpfile("cnn.fsdb");
-    $fsdbDumpvars("+struct", "+mda");
-    `endif
-
+    $fsdbDumpvars("+mda");
+    `elsif VCD
+    $dumpfile("cnn.vcd");
+		$dumpvars;
+    `endif 
+  end
 
 
 endmodule
