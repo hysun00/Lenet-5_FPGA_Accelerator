@@ -21,29 +21,29 @@ module cnn_tb;
     .BRAM_IF_ADDR(BRAM_IF_ADDR),
     .BRAM_W_ADDR(BRAM_W_ADDR),
     .BRAM_TEMP_ADDR(BRAM_TEMP_ADDR),
-    .BRAM_IF_WE(),
-    .BRAM_W_WE(),
-    .BRAM_TEMP_WE(),
-    .BRAM_IF_EN(),
-    .BRAM_W_EN(),
-    .BRAM_TEMP_EN(),
+    .BRAM_IF_WE(BRAM_IF_WE),
+    .BRAM_W_WE(BRAM_W_WE),
+    .BRAM_TEMP_WE(BRAM_TEMP_WE),
+    .BRAM_IF_EN(BRAM_IF_EN),
+    .BRAM_W_EN(BRAM_W_EN),
+    .BRAM_TEMP_EN(BRAM_TEMP_EN),
     .BRAM_IF_RST(),
     .BRAM_W_RST(),
     .BRAM_TEMP_RST(),
-    .BRAM_IF_DOUT(),
-    .BRAM_W_DOUT(),
-    .BRAM_TEMP_DOUT(),
+    .BRAM_IF_DOUT(BRAM_IF_DOUT),
+    .BRAM_W_DOUT(BRAM_W_DOUT),
+    .BRAM_TEMP_DOUT(BRAM_TEMP_DOUT),
     .BRAM_IF_DIN(BRAM_IF_DIN),
     .BRAM_W_DIN(BRAM_W_DIN),
-    .BRAM_TEMP_DIN()
+    .BRAM_TEMP_DIN(BRAM_TEMP_DIN)
   );
 
   bram bram_w(
     .clk(clk),
     .rst(rst),
-    .wen(),
+    .wen(BRAM_W_WE),
     .addr(BRAM_W_ADDR),
-    .en(),
+    .en(BRAM_W_EN),
     .dout(BRAM_W_DOUT),
     .din(BRAM_W_DIN)
   );
@@ -52,9 +52,9 @@ module cnn_tb;
   bram bram_tmp(
     .clk(clk),
     .rst(rst),
-    .wen(),
+    .wen(BRAM_TEMP_WE),
     .addr(BRAM_TEMP_ADDR),
-    .en(),
+    .en(BRAM_TEMP_EN),
     .dout(BRAM_TEMP_DOUT),
     .din(BRAM_TEMP_DIN)
   );
@@ -62,9 +62,9 @@ module cnn_tb;
   bram bram_f(
     .clk(clk),
     .rst(rst),
-    .wen(),
+    .wen(BRAM_IF_WE),
     .addr(BRAM_IF_ADDR),
-    .en(),
+    .en(BRAM_IF_EN),
     .dout(BRAM_IF_DOUT),
     .din(BRAM_IF_DIN)
   );
