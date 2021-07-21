@@ -75,6 +75,8 @@ module cnn_tb;
   );
 
   reg [31:0] GOLDEN [0:293];
+  reg [31:0] mem1 [0:50];
+  reg [31:0] mem2 [0:255];
   initial begin
     clk = 0; rst = 1;
     start = 0;
@@ -129,10 +131,17 @@ module cnn_tb;
   always #(`CYCLE/2) clk = ~clk;
 
   initial begin
-		$readmemh("../number/number_conv1_32.hex", bram_w.mem, 0);
-    $readmemh("../number/number_conv1_32_in.hex", bram_f.mem, 0);
-    $readmemh("../number/number_conv1_32_out.hex", GOLDEN, 0);
-	end
+		$readmemh("./number/number_conv1_32.hex", mem1, 0);
+    for(i = 0; i < 38; i=i+1) bram_w.mem[i] = mem1[i];
+  end
+  initial begin
+    $readmemh("./number/number_conv1_32_in.hex", mem2, 0);
+    for(i = 0; i < 256; i=i+1) bram_f.mem[i] = mem2[i]; 
+  end
+  initial begin  
+    $readmemh("./number/number_conv1_32_out.hex", GOLDEN, 0);
+  end
+	
 
   initial begin
     `ifdef FSDB
