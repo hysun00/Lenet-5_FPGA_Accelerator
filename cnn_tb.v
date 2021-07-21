@@ -144,13 +144,13 @@ module cnn_tb;
 	
 
   initial begin
-    `ifdef FSDB
-    $fsdbDumpfile("cnn.fsdb");
-    $fsdbDumpvars("+mda");
-    `elsif VCD
+    // `ifdef FSDB
+    // $fsdbDumpfile("cnn.fsdb");
+    // $fsdbDumpvars("+mda");
+    // `elsif VCD
     $dumpfile("cnn.vcd");
 		$dumpvars;
-    `endif 
+    // `endif 
   end
 
 

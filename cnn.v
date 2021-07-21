@@ -478,6 +478,9 @@ module cnn(clk,
     end
   end
 
+  assign relu_en = 1;
+  assign quan_en = 1;
+
   // ========================================= PE =====================================================================
   genvar a; 
 	generate 
@@ -542,8 +545,7 @@ module cnn(clk,
     end
 	endgenerate
 // ============================================================================================
-  assign relu_en = 1;
-  assign quan_en = 1;
+
   assign sft_mx_pl_reg = (state == MX_PL1 || state == MX_PL2);
 
   reg [7:0] temp1, temp2, mx_pl_out;

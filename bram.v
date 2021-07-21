@@ -11,14 +11,14 @@ module bram(clk, rst, dout, addr, en, din, wen);
   reg [31:0] mem [0:10000];
 
   always @(posedge clk) begin
-    if(wen == 4'b1111 && en) mem[addrW] <= din;
+    if(wen == 4'b1111 && en) mem[addr] <= din;
   end
 
   always @(posedge clk) begin
-    if(en) dout <= mem[addrW];
+    if(en) dout <= mem[addr];
   end
 
-  assign addrW = addr >> 2;
+  //assign addrW = addr >> 2;
 
 
 

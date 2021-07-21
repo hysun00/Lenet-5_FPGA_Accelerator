@@ -161,7 +161,7 @@ module PE(rst,
              ((mul[13] + mul[14]) + (mul[15] + mul[16])) +
              ((mul[17] + mul[18]) + (mul[19] + mul[20])) +
              ((mul[21] + mul[22]) + (mul[23] + mul[24])) +
-             (mul[25]);
+             (mul[0]);
     end
   end
 
