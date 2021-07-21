@@ -2,7 +2,7 @@ module bram(clk, rst, dout, addr, en, din, wen);
   
   input clk;
   input rst;
-  output [31:0] dout;
+  output reg [31:0] dout;
   input  [3:0]  wen;  
   input  [31:0] addr;
   input  en;

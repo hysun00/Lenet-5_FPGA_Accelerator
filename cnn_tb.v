@@ -2,16 +2,21 @@
 
 `define CYCLE 10
 `include "cnn.v"
-`include "bram_w."
-`include "bram_if.v"
-`include "bram_tmp.v"
+`include "bram.v"
+
 
 module cnn_tb;
   reg clk;
   reg rst;
   reg start;
   wire done;
-  wire 
+
+  integer err, i;
+  wire [31:0] BRAM_IF_ADDR, BRAM_W_ADDR, BRAM_TEMP_ADDR;
+  wire [3:0] BRAM_IF_WE, BRAM_W_WE, BRAM_TEMP_WE;
+  wire BRAM_IF_EN, BRAM_W_EN, BRAM_TEMP_EN;
+  wire [31:0] BRAM_IF_DOUT, BRAM_W_DOUT, BRAM_TEMP_DOUT;
+  wire [31:0] BRAM_IF_DIN, BRAM_W_DIN, BRAM_TEMP_DIN;
 
   cnn cnn(
     .clk(clk),
@@ -69,14 +74,14 @@ module cnn_tb;
     .din(BRAM_IF_DIN)
   );
 
-  reg [7:0] GOLDEN [0:293]
+  reg [31:0] GOLDEN [0:293];
   initial begin
     clk = 0; rst = 1;
     start = 0;
     #1 rst = 0;
     #20 start = 1;
     #10 start = 0;
-    wait(fin);
+    wait(done);
     #(`CYCLE*2)
     #20 
     $display("\n============ Done ===================\n");
@@ -84,12 +89,12 @@ module cnn_tb;
     err = 0;
 
     for (i = 0; i < 294; i=i+1) begin
-      if(tmp.mem[i] !== GOLDEN[i])begin
-        $display("DM[%4d] = %h, expect = %h", i, tmp.mem[i], GOLDEN[i]);
+      if(bram_tmp.mem[i] !== GOLDEN[i])begin
+        $display("DM[%4d] = %h, expect = %h", i, bram_tmp.mem[i], GOLDEN[i]);
         err = err + 1;
       end
       else begin
-        $display("DM[%4d] = %h, pass",  i, tmp.mem[i]);
+        $display("DM[%4d] = %h, pass",  i, bram_tmp.mem[i]);
       end
       
     end
@@ -124,9 +129,9 @@ module cnn_tb;
   always #(`CYCLE/2) clk = ~clk;
 
   initial begin
-		$readmemh("./number", bram_w.mem, 0);
-    $readmemh("./number", bram_f.mem, 0);
-    $readmemh("./number", GOLDEN, 0);
+		$readmemh("../number/number_conv1_32.hex", bram_w.mem, 0);
+    $readmemh("../number/number_conv1_32_in.hex", bram_f.mem, 0);
+    $readmemh("../number/number_conv1_32_out.hex", GOLDEN, 0);
 	end
 
   initial begin
