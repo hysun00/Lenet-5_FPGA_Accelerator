@@ -97,7 +97,7 @@ module cnn(clk,
 
   assign done = (state == DONE);
 
-  assign BRAM_IF_EN = (state == IDLE || state == RD_BRTCH1 || state == RD_BRTCH2 || state == READ24);
+  assign BRAM_IF_EN = (state == IDLE || state == RD_BRTCH1 || state == RD_BRTCH2 || state == RD_BRTCH3 || state == READ24);
   assign BRAM_W_EN  = (state == IDLE || state == RD_BRTCH1 || state == RD_BRTCH2 || state == READ24);
   assign BRAM_TEMP_EN = (state == WRITE_TEMP);
 
@@ -310,6 +310,7 @@ module cnn(clk,
         if(counter == 0) icache_indx <= 4;
         else icache_indx <= icache_indx + 8;
       end
+      else if(state == WRITE_TEMP) icache_indx <= 0;
     end
   end
 

@@ -131,15 +131,18 @@ module cnn_tb;
   always #(`CYCLE/2) clk = ~clk;
 
   initial begin
-		$readmemh("./number/number_conv1_32.hex", mem1, 0);
+		//$readmemh("./number/number_conv1_32.hex", mem1, 0);
+    $readmemh("./letter/letter_conv1_32_w.hex", mem1, 0);
     for(i = 0; i < 38; i=i+1) bram_w.mem[i] = mem1[i];
   end
   initial begin
-    $readmemh("./number/number_conv1_32_in.hex", mem2, 0);
+    //$readmemh("./number/number_conv1_32_in.hex", mem2, 0);
+    $readmemh("./letter/letter_conv1_32_in.hex", mem2, 0);
     for(i = 0; i < 256; i=i+1) bram_f.mem[i] = mem2[i]; 
   end
   initial begin  
-    $readmemh("./number/number_conv1_32_out.hex", GOLDEN, 0);
+    //$readmemh("./number/number_conv1_32_out.hex", GOLDEN, 0);
+    $readmemh("./letter/letter_conv1_32_out.hex", GOLDEN, 0);
   end
 	
 
