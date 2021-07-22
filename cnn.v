@@ -231,27 +231,35 @@ module cnn(clk,
   end
 
   // BRAM_IF_ADDR
+  // x
   always @(posedge clk or posedge rst) begin
-    if(rst) begin x <= 0; y <= 0; end
+    if(rst) x <= 0;
     else begin
-      if(state == RD_BRTCH1 || state == READ24) begin
+      if(state == RD_BRTCH1) begin
         x <= x + 1;
-        if(x == 1) begin
-          y <= y + 1;
-          x <= 0;
-        end
+        if(x == 1) x <= 0;
       end
+      else if(state == READ_TILE1) x <= 0;
     end
   end
 
+  // y
+  always @(posedge clk or posedge rst) begin
+    if(rst) y <= 0;
+    else begin
+      if(state == RD_BRTCH1 && x == 1) y <= y + 1;
+      else if(state == READ24) y <= y + 1;
+      else if(state == READ_TILE1) y <= 0;
+    end
+  end
 
   assign BRAM_IF_ADDR = base_addr_r + base_addr_c + {y, x};
 
   always @(posedge clk or posedge rst) begin
     if(rst) base_addr_r <= 0;
     else begin
-      if(state == READ24 && counter == 0) base_addr_r <= base_addr_r + 1;
-      else if(state == READ24 && cnt_rd24 < 6) base_addr_r <= 2;
+      if(state == READ_TILE1) base_addr_r <= base_addr_r + 1;
+      else if(n_state == READ24 && cnt_rd24 == 0) base_addr_r <= 2; // READ24 first time
       else if(state == RD_BRTCH1) base_addr_r <= 0;
     end
   end
@@ -286,6 +294,7 @@ module cnn(clk,
     if(rst) wcache_indx <= 0;
     else begin
       if((state == RD_BRTCH1 && counter != 0)|| state == RD_BRTCH2) wcache_indx <= wcache_indx + 4;
+      else wcache_indx <= 0;
     end
   end
 
@@ -294,6 +303,10 @@ module cnn(clk,
     if(rst) icache_indx <= 0;
     else begin
       if(state == RD_BRTCH1 && counter != 0) icache_indx <= icache_indx + 4;
+      else if(state == READ24) begin
+        if(counter == 0) icache_indx <= 4;
+        else icache_indx <= icache_indx + 8;
+      end
     end
   end
 
@@ -317,6 +330,7 @@ module cnn(clk,
   o o o o o o o o  24 25 26 27 28 29 30 31
   o o o o o o o o  32 33 34 35 36 37 38 39
   o o o o o o o o  40 41 42 43 44 45 46 47
+  ----------------------------------------
   o o o o o o o o  48 49 50 51 52 53 54 55
   o o o o o o o o  56 57 58 59 60 61 62 63
 */
@@ -578,6 +592,7 @@ module cnn(clk,
     if(rst) mx_pl_reg_indx <= 0;
     else begin
       if(state == WRITE_TEMP) mx_pl_reg_indx <= mx_pl_reg_indx + 4;
+      else mx_pl_reg_indx <= 0;
     end
   end
 

@@ -164,6 +164,6 @@ module PE(rst,
   end
 
   assign relu_out = (relu_en) ? ((sum < 0) ? 0 : sum) : sum;
-  assign pe_out = (quan_en) ? (relu_out[14:7] + relu_out[6]) : relu_out; 
+  assign pe_out = (quan_en) ? ((relu_out[15]) ? 255 : (relu_out[14:7] + relu_out[6])) : relu_out; 
 
 endmodule
