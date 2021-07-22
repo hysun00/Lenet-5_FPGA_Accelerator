@@ -37,7 +37,7 @@ module cnn(clk,
 
   integer i, j;
 
-  reg [`DATA_BITS-1:0] BRAM_W_ADDR, BRAM_TEMP_ADDR, BRAM_TEMP_DIN;
+  reg [`DATA_BITS-1:0] BRAM_W_ADDR, BRAM_TEMP_ADDR;
 
   reg [7:0] pe_pre_in [0:24];
 
@@ -121,7 +121,7 @@ module cnn(clk,
       IDLE:        n_state = (start) ? RD_BRTCH1 : IDLE;
       RD_BRTCH1:   n_state = (counter == 12) ? ((w_ready) ? READ_TILE1 : RD_BRTCH2) : RD_BRTCH1;  
       RD_BRTCH2:   n_state = (counter == 38) ? READ_TILE1 : RD_BRTCH2;
-      READ24:      n_state = (counter == 5)  ? READ_TILE1 : READ24;  // repeat 6 times -> RD_BRTCH1
+      READ24:      n_state = (counter == 6)  ? READ_TILE1 : READ24;  // repeat 6 times -> RD_BRTCH1
       READ_TILE1:  n_state = READ_TILE2; 
       READ_TILE2:  n_state = READ_TILE5; 
       READ_TILE3:  n_state = READ_TILE4; 
@@ -160,7 +160,7 @@ module cnn(clk,
     if(rst) counter <= 0;
     else begin
       if((state == RD_BRTCH1 && counter <= 11) || (state == RD_BRTCH2 && counter <= 37) || 
-         (state == READ24 && counter <= 4) || ((state == MX_PL1 || state == MX_PL2) && counter <= 4) ||
+         (state == READ24 && counter <= 5) || ((state == MX_PL1 || state == MX_PL2) && counter <= 4) ||
          ((state == EXE1 || state == EXE2) && counter <= 1) || (state == WRITE_TEMP && counter <= 1)) 
         counter <= counter + 1;
       else counter <= 0; // (state == RD_BRTCH1 && counter == 11) || (state == RD_BRTCH2 && counter == 37)
@@ -178,36 +178,38 @@ module cnn(clk,
           for(i = 1; i < 42; i=i+8) i_cache[i] <= i_cache[i+4];
           for(i = 2; i < 43; i=i+8) i_cache[i] <= i_cache[i+4];
           for(i = 3; i < 44; i=i+8) i_cache[i] <= i_cache[i+4];
+        end
+        else if(counter == 1) begin
           i_cache[4]  <= BRAM_IF_DOUT[31-:8];
           i_cache[5]  <= BRAM_IF_DOUT[23-:8];
           i_cache[6]  <= BRAM_IF_DOUT[15-:8];
           i_cache[7]  <= BRAM_IF_DOUT[ 7-:8];
         end
-        else if(counter == 1) begin
+        else if(counter == 2) begin
           i_cache[12] <= BRAM_IF_DOUT[31-:8];
           i_cache[13] <= BRAM_IF_DOUT[23-:8];
           i_cache[14] <= BRAM_IF_DOUT[15-:8];
           i_cache[15] <= BRAM_IF_DOUT[ 7-:8];
         end
-        else if(counter == 2) begin
+        else if(counter == 3) begin
           i_cache[20] <= BRAM_IF_DOUT[31-:8];
           i_cache[21] <= BRAM_IF_DOUT[23-:8];
           i_cache[22] <= BRAM_IF_DOUT[15-:8];
           i_cache[23] <= BRAM_IF_DOUT[ 7-:8];
         end
-        else if(counter == 3) begin
+        else if(counter == 4) begin
           i_cache[28] <= BRAM_IF_DOUT[31-:8];
           i_cache[29] <= BRAM_IF_DOUT[23-:8];
           i_cache[30] <= BRAM_IF_DOUT[15-:8];
           i_cache[31] <= BRAM_IF_DOUT[ 7-:8];
         end
-        else if(counter == 4) begin
+        else if(counter == 5) begin
           i_cache[36] <= BRAM_IF_DOUT[31-:8];
           i_cache[37] <= BRAM_IF_DOUT[23-:8];
           i_cache[38] <= BRAM_IF_DOUT[15-:8];
           i_cache[39] <= BRAM_IF_DOUT[ 7-:8];
         end
-        else if(counter == 5) begin
+        else if(counter == 6) begin
           i_cache[44] <= BRAM_IF_DOUT[31-:8];
           i_cache[45] <= BRAM_IF_DOUT[23-:8];
           i_cache[46] <= BRAM_IF_DOUT[15-:8];
@@ -557,9 +559,9 @@ module cnn(clk,
     if(rst) for(i = 0; i < 8; i=i+1) mx_pl_reg[i] <= 0;
     else begin
       if(sft_mx_pl_reg) begin
-        mx_pl_reg[0] <= mx_pl_out;
-        for(i = 0; i < 11; i=i+1) begin
-          mx_pl_reg[i+1] <= mx_pl_reg[i]; 
+        mx_pl_reg[11] <= mx_pl_out;
+        for(i = 11; i >= 1; i=i-1) begin
+          mx_pl_reg[i-1] <= mx_pl_reg[i]; 
         end
       end
     end
@@ -569,12 +571,7 @@ module cnn(clk,
 
   // BRAM_TEMP_DIN
   // assign  BRAM_TEMP_DIN = mx_pl_out; (4 個一組)
-  always @(posedge clk or posedge rst) begin
-    if(rst) BRAM_TEMP_DIN <= 0;
-    else begin
-      BRAM_TEMP_DIN <= {mx_pl_reg[mx_pl_reg_indx], mx_pl_reg[mx_pl_reg_indx+1], mx_pl_reg[mx_pl_reg_indx+2], mx_pl_reg[mx_pl_reg_indx+3]};
-    end
-  end
+  assign BRAM_TEMP_DIN = {mx_pl_reg[mx_pl_reg_indx], mx_pl_reg[mx_pl_reg_indx+1], mx_pl_reg[mx_pl_reg_indx+2], mx_pl_reg[mx_pl_reg_indx+3]};
   
 
   always @(posedge clk or posedge rst) begin
@@ -590,6 +587,7 @@ module cnn(clk,
     if(rst) pe_sram_indx_j <= 0;
     else begin
       if(state == MX_PL1 || state == MX_PL2) pe_sram_indx_j <= pe_sram_indx_j + 1;
+      else pe_sram_indx_j <= 0; 
     end
   end
 
