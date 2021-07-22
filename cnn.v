@@ -123,8 +123,8 @@ module cnn(clk,
   always @(*) begin
     case (state)
       IDLE:        n_state = (start) ? RD_BRTCH1 : IDLE;
-      RD_BRTCH1:   n_state = (counter == 11) ? ((w_ready) ? READ_TILE1 : RD_BRTCH2) : RD_BRTCH1;  
-      RD_BRTCH2:   n_state = (counter == 37) ? READ_TILE1 : RD_BRTCH2;
+      RD_BRTCH1:   n_state = (counter == 12) ? ((w_ready) ? READ_TILE1 : RD_BRTCH2) : RD_BRTCH1;  
+      RD_BRTCH2:   n_state = (counter == 38) ? READ_TILE1 : RD_BRTCH2;
       READ24:      n_state = (counter == 5)  ? READ_TILE1 : READ24;  // repeat 6 times -> RD_BRTCH1
       READ_TILE1:  n_state = READ_TILE2; 
       READ_TILE2:  n_state = READ_TILE5; 
@@ -163,7 +163,7 @@ module cnn(clk,
   always @(posedge clk or posedge rst) begin
     if(rst) counter <= 0;
     else begin
-      if((state == RD_BRTCH1 && counter <= 10) || (state == RD_BRTCH2 && counter <= 36) || 
+      if((state == RD_BRTCH1 && counter <= 11) || (state == RD_BRTCH2 && counter <= 37) || 
          (state == READ24 && counter <= 4) || ((state == MX_PL1 || state == MX_PL2) && counter <= 4) ||
          ((state == EXE1 || state == EXE2) && counter <= 1) || (state == WRITE_TEMP && counter <= 1)) 
         counter <= counter + 1;
@@ -218,7 +218,7 @@ module cnn(clk,
           i_cache[47] <= BRAM_IF_DOUT[ 7-:8];
         end                              
       end 
-      else if(state == RD_BRTCH1) {i_cache[icache_indx], i_cache[icache_indx+1], i_cache[icache_indx+2], i_cache[icache_indx+3]} <= BRAM_IF_DOUT; // 12 cycle (initial)
+      else if(state == RD_BRTCH1 && counter != 0) {i_cache[icache_indx], i_cache[icache_indx+1], i_cache[icache_indx+2], i_cache[icache_indx+3]} <= BRAM_IF_DOUT; // 12 cycle (initial)
     end
   end
 
@@ -271,7 +271,7 @@ module cnn(clk,
       for(i = 0; i < 200; i=i+1) w_cache[i] <= 0; 
     end
     else begin
-      if(state == RD_BRTCH1 || state == RD_BRTCH2) {w_cache[wcache_indx], w_cache[wcache_indx+1], w_cache[wcache_indx+2], w_cache[wcache_indx+3]} <= BRAM_W_DOUT; // 改為4筆資料一行 => 50 cycle
+      if((state == RD_BRTCH1 || state == RD_BRTCH2) && counter != 0) {w_cache[wcache_indx], w_cache[wcache_indx+1], w_cache[wcache_indx+2], w_cache[wcache_indx+3]} <= BRAM_W_DOUT; // 改為4筆資料一行 => 50 cycle
     end
   end
 
@@ -279,7 +279,7 @@ module cnn(clk,
   always @(posedge clk or posedge rst) begin
     if(rst) BRAM_W_ADDR <= 0;
     else begin
-      if(n_state == RD_BRTCH1 || state == RD_BRTCH1 || state == RD_BRTCH2) BRAM_W_ADDR <= BRAM_W_ADDR + 1;
+      if(state == RD_BRTCH1 || state == RD_BRTCH2) BRAM_W_ADDR <= BRAM_W_ADDR + 1;
     end
   end
 
@@ -287,7 +287,7 @@ module cnn(clk,
   always @(posedge clk or posedge rst) begin
     if(rst) wcache_indx <= 0;
     else begin
-      if(state == RD_BRTCH1 || state == RD_BRTCH2) wcache_indx <= wcache_indx + 4;
+      if((state == RD_BRTCH1 || state == RD_BRTCH2)  && counter != 0) wcache_indx <= wcache_indx + 4;
     end
   end
 
@@ -295,7 +295,7 @@ module cnn(clk,
   always @(posedge clk or posedge rst) begin
     if(rst) icache_indx <= 0;
     else begin
-      if(state == RD_BRTCH1) icache_indx <= icache_indx + 4;
+      if(state == RD_BRTCH1 && counter != 0) icache_indx <= icache_indx + 4;
     end
   end
 

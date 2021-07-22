@@ -81,7 +81,7 @@ module cnn_tb;
     clk = 0; rst = 1;
     start = 0;
     #1 rst = 0;
-    #13 start = 1;
+    #20 start = 1;
     #10 start = 0;
     wait(done);
     #(`CYCLE*2)
