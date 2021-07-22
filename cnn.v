@@ -78,21 +78,22 @@ module cnn(clk,
   parameter IDLE        = 0,
             RD_BRTCH1   = 1,    // read bram to cache (16 cycle)
             RD_BRTCH2   = 2,    // read bram to cache (34 cycle) total 50 cycle (weight)
-            READ24      = 3,
-            READ_TILE1  = 4,
-            READ_TILE2  = 5,
-            READ_TILE3  = 6,
-            READ_TILE4  = 7,
-            READ_TILE5  = 8,
-            READ_TILE6  = 9,
-            READ_TILE7  = 10,
-            READ_TILE8  = 11,
-            EXE1        = 12,
-            EXE2        = 13,
-            MX_PL1      = 14,
-            MX_PL2      = 15,
-            WRITE_TEMP  = 16,
-            DONE        = 17;
+            RD_BRTCH3   = 3,
+            READ24      = 4,
+            READ_TILE1  = 5,
+            READ_TILE2  = 6,
+            READ_TILE3  = 7,
+            READ_TILE4  = 8,
+            READ_TILE5  = 9,
+            READ_TILE6  = 10,
+            READ_TILE7  = 11,
+            READ_TILE8  = 12,
+            EXE1        = 13,
+            EXE2        = 14,
+            MX_PL1      = 15,
+            MX_PL2      = 16,
+            WRITE_TEMP  = 17,
+            DONE        = 18;
 
   assign done = (state == DONE);
 
@@ -119,14 +120,15 @@ module cnn(clk,
   always @(*) begin
     case (state)
       IDLE:        n_state = (start) ? RD_BRTCH1 : IDLE;
-      RD_BRTCH1:   n_state = (counter == 12) ? ((w_ready) ? READ_TILE1 : RD_BRTCH2) : RD_BRTCH1;  
+      RD_BRTCH1:   n_state = (counter == 12) ? ((w_ready) ? READ_TILE1 : RD_BRTCH2) : RD_BRTCH1;
       RD_BRTCH2:   n_state = (counter == 38) ? READ_TILE1 : RD_BRTCH2;
+      RD_BRTCH3:   n_state = (counter == 12) ? READ_TILE1 : RD_BRTCH3;
       READ24:      n_state = (counter == 6)  ? READ_TILE1 : READ24;  // repeat 6 times -> RD_BRTCH1
-      READ_TILE1:  n_state = READ_TILE2; 
-      READ_TILE2:  n_state = READ_TILE5; 
-      READ_TILE3:  n_state = READ_TILE4; 
-      READ_TILE4:  n_state = READ_TILE7; 
-      READ_TILE5:  n_state = READ_TILE6; 
+      READ_TILE1:  n_state = READ_TILE2;
+      READ_TILE2:  n_state = READ_TILE5;
+      READ_TILE3:  n_state = READ_TILE4;
+      READ_TILE4:  n_state = READ_TILE7;
+      READ_TILE5:  n_state = READ_TILE6;
       READ_TILE6:  n_state = EXE1;
       READ_TILE7:  n_state = READ_TILE8; 
       READ_TILE8:  n_state = EXE2;
@@ -134,7 +136,7 @@ module cnn(clk,
       EXE2:        n_state = (counter == 2) ? MX_PL2 : EXE2;
       MX_PL1:      n_state = (counter == 5) ? READ_TILE3 : MX_PL1;  // repeat 6 times -> RD_BRTCH1
       MX_PL2:      n_state = (counter == 5) ? WRITE_TEMP : MX_PL2;
-      WRITE_TEMP:  n_state = (BRAM_TEMP_ADDR == 293) ? DONE : ((counter == 2) ? ((cnt_rd24 == 6) ? RD_BRTCH1 : READ24) : WRITE_TEMP);
+      WRITE_TEMP:  n_state = (BRAM_TEMP_ADDR == 293) ? DONE : ((counter == 2) ? ((cnt_rd24 == 6) ? RD_BRTCH3 : READ24) : WRITE_TEMP);
       DONE:        n_state = IDLE;
       default:     n_state = IDLE;
     endcase
@@ -152,7 +154,7 @@ module cnn(clk,
     if(rst) cnt_rd24 <= 0;
     else begin
       if(state == READ24 && counter == 1) cnt_rd24 <= cnt_rd24 + 1;
-      else if(state == RD_BRTCH1) cnt_rd24 <= 0;
+      else if(state == RD_BRTCH1 || state == RD_BRTCH3) cnt_rd24 <= 0;
     end
   end
 
@@ -161,7 +163,8 @@ module cnn(clk,
     else begin
       if((state == RD_BRTCH1 && counter <= 11) || (state == RD_BRTCH2 && counter <= 37) || 
          (state == READ24 && counter <= 5) || ((state == MX_PL1 || state == MX_PL2) && counter <= 4) ||
-         ((state == EXE1 || state == EXE2) && counter <= 1) || (state == WRITE_TEMP && counter <= 1)) 
+         ((state == EXE1 || state == EXE2) && counter <= 1) || (state == WRITE_TEMP && counter <= 1) || 
+          (state == RD_BRTCH3 && counter <= 11)) 
         counter <= counter + 1;
       else counter <= 0; // (state == RD_BRTCH1 && counter == 11) || (state == RD_BRTCH2 && counter == 37)
     end
@@ -216,7 +219,7 @@ module cnn(clk,
           i_cache[47] <= BRAM_IF_DOUT[ 7-:8];
         end                              
       end 
-      else if(state == RD_BRTCH1 && counter != 0) {i_cache[icache_indx], i_cache[icache_indx+1], i_cache[icache_indx+2], i_cache[icache_indx+3]} <= BRAM_IF_DOUT; // 12 cycle (initial)
+      else if((state == RD_BRTCH1 || state == RD_BRTCH3) && counter != 0) {i_cache[icache_indx], i_cache[icache_indx+1], i_cache[icache_indx+2], i_cache[icache_indx+3]} <= BRAM_IF_DOUT; // 12 cycle (initial)
     end
   end
 
@@ -235,7 +238,7 @@ module cnn(clk,
   always @(posedge clk or posedge rst) begin
     if(rst) x <= 0;
     else begin
-      if(state == RD_BRTCH1) begin
+      if(state == RD_BRTCH1 || state == RD_BRTCH3) begin
         x <= x + 1;
         if(x == 1) x <= 0;
       end
@@ -247,7 +250,7 @@ module cnn(clk,
   always @(posedge clk or posedge rst) begin
     if(rst) y <= 0;
     else begin
-      if(state == RD_BRTCH1 && x == 1) y <= y + 1;
+      if((state == RD_BRTCH1 || state == RD_BRTCH3) && x == 1) y <= y + 1;
       else if(state == READ24) y <= y + 1;
       else if(state == READ_TILE1) y <= 0;
     end
@@ -260,14 +263,14 @@ module cnn(clk,
     else begin
       if(state == READ_TILE1) base_addr_r <= base_addr_r + 1;
       else if(n_state == READ24 && cnt_rd24 == 0) base_addr_r <= 2; // READ24 first time
-      else if(state == RD_BRTCH1) base_addr_r <= 0;
+      else if(state == RD_BRTCH1 || state == RD_BRTCH3) base_addr_r <= 0;
     end
   end
 
   always @(posedge clk or posedge rst) begin
     if(rst) base_addr_c <= 0;
     else begin
-      if(state == READ24 && cnt_rd24 == 6) base_addr_c <= base_addr_c + 16;
+      if(state == READ24 && cnt_rd24 == 6 && counter == 5) base_addr_c <= base_addr_c + 16;
     end
   end
 
@@ -285,7 +288,7 @@ module cnn(clk,
   always @(posedge clk or posedge rst) begin
     if(rst) BRAM_W_ADDR <= 0;
     else begin
-      if(state == RD_BRTCH1 || state == RD_BRTCH2) BRAM_W_ADDR <= BRAM_W_ADDR + 1;
+      if(state == RD_BRTCH1 || state == RD_BRTCH2 || state == RD_BRTCH3) BRAM_W_ADDR <= BRAM_W_ADDR + 1;
     end
   end
 
@@ -293,7 +296,7 @@ module cnn(clk,
   always @(posedge clk or posedge rst) begin
     if(rst) wcache_indx <= 0;
     else begin
-      if((state == RD_BRTCH1 && counter != 0)|| state == RD_BRTCH2) wcache_indx <= wcache_indx + 4;
+      if(((state == RD_BRTCH1 || state == RD_BRTCH3) && counter != 0)|| state == RD_BRTCH2) wcache_indx <= wcache_indx + 4;
       else wcache_indx <= 0;
     end
   end
@@ -302,7 +305,7 @@ module cnn(clk,
   always @(posedge clk or posedge rst) begin
     if(rst) icache_indx <= 0;
     else begin
-      if(state == RD_BRTCH1 && counter != 0) icache_indx <= icache_indx + 4;
+      if((state == RD_BRTCH1 || state == RD_BRTCH3) && counter != 0) icache_indx <= icache_indx + 4;
       else if(state == READ24) begin
         if(counter == 0) icache_indx <= 4;
         else icache_indx <= icache_indx + 8;
