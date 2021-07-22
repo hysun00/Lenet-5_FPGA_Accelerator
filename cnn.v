@@ -267,7 +267,7 @@ module cnn(clk,
       for(i = 0; i < 200; i=i+1) w_cache[i] <= 0; 
     end
     else begin
-      if((state == RD_BRTCH1 || state == RD_BRTCH2) && counter != 0) {w_cache[wcache_indx], w_cache[wcache_indx+1], w_cache[wcache_indx+2], w_cache[wcache_indx+3]} <= BRAM_W_DOUT; // 改為4筆資料一行 => 50 cycle
+      if((state == RD_BRTCH1 && counter != 0)|| state == RD_BRTCH2) {w_cache[wcache_indx], w_cache[wcache_indx+1], w_cache[wcache_indx+2], w_cache[wcache_indx+3]} <= BRAM_W_DOUT; // 改為4筆資料一行 => 50 cycle
     end
   end
 
@@ -283,7 +283,7 @@ module cnn(clk,
   always @(posedge clk or posedge rst) begin
     if(rst) wcache_indx <= 0;
     else begin
-      if((state == RD_BRTCH1 || state == RD_BRTCH2)  && counter != 0) wcache_indx <= wcache_indx + 4;
+      if((state == RD_BRTCH1 && counter != 0)|| state == RD_BRTCH2) wcache_indx <= wcache_indx + 4;
     end
   end
 
