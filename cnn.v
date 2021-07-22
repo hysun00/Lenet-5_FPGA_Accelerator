@@ -279,7 +279,7 @@ module cnn(clk,
   always @(posedge clk or posedge rst) begin
     if(rst) BRAM_W_ADDR <= 0;
     else begin
-      if(state == RD_BRTCH1 || state == RD_BRTCH2) BRAM_W_ADDR <= BRAM_W_ADDR + 1;
+      if(n_state == RD_BRTCH1 || state == RD_BRTCH1 || state == RD_BRTCH2) BRAM_W_ADDR <= BRAM_W_ADDR + 1;
     end
   end
 
