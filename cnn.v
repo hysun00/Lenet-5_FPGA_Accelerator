@@ -107,8 +107,6 @@ module cnn(clk,
 /*
   READ TILE:   1  2  3  4 
                5  6  7  8 
-
-
   order: 1 2 5 6 -> 3 4 7 8 
 */  
 
@@ -117,8 +115,6 @@ module cnn(clk,
     else state <= n_state;
   end
 
- // 1. 沒有跳到 3 4 7 8 
- // 2. write_temp 
   // next state logic
   always @(*) begin
     case (state)
