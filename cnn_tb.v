@@ -133,7 +133,7 @@ module cnn_tb;
 
   initial begin
     `ifdef number
-		  $readmemh("./number/number_conv1_32.hex", bram_w.mem);
+      $readmemh("./number/number_conv1_32.hex", bram_w.mem);
       $readmemh("./number/number_conv1_32_in.hex", bram_f.mem);
       $readmemh("./number/number_conv1_32_out.hex", GOLDEN, 0);
     `elsif letter
@@ -149,7 +149,7 @@ module cnn_tb;
     // $fsdbDumpvars("+mda");
     // `elsif VCD
     $dumpfile("cnn.vcd");
-		$dumpvars;
+    $dumpvars;
     // `endif 
   end
 
