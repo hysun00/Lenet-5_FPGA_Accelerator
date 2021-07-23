@@ -84,8 +84,9 @@ module cnn_tb;
     #20 start = 1;
     #10 start = 0;
     wait(done);
+    $timeformat(-9, 2, " ns", 10); 
+    $display("\nSimulation time = %t\n",$time);
     #(`CYCLE*2)
-    #20 
     $display("\n============ Done ===================\n");
     $display("\n======== Check start ================\n");
     err = 0;
@@ -132,29 +133,16 @@ module cnn_tb;
 
   initial begin
     `ifdef number
-		  $readmemh("./number/number_conv1_32.hex", mem1, 0);
-    `elsif letter
-      $readmemh("./letter/letter_conv1_32_w.hex", mem1, 0);
-    `endif
-    for(i = 0; i < 38; i=i+1) bram_w.mem[i] = mem1[i];
-  end
-  initial begin
-    `ifdef number
-      $readmemh("./number/number_conv1_32_in.hex", mem2, 0);
-    `elsif letter
-      $readmemh("./letter/letter_conv1_32_in.hex", mem2, 0);
-    `endif 
-    for(i = 0; i < 256; i=i+1) bram_f.mem[i] = mem2[i]; 
-  end
-  initial begin  
-    `ifdef number
+		  $readmemh("./number/number_conv1_32.hex", bram_w.mem);
+      $readmemh("./number/number_conv1_32_in.hex", bram_f.mem);
       $readmemh("./number/number_conv1_32_out.hex", GOLDEN, 0);
     `elsif letter
+      $readmemh("./letter/letter_conv1_32_w.hex", bram_w.mem);
+      $readmemh("./letter/letter_conv1_32_in.hex", bram_f.mem);
       $readmemh("./letter/letter_conv1_32_out.hex", GOLDEN, 0);
     `endif
   end
 	
-
   initial begin
     // `ifdef FSDB
     // $fsdbDumpfile("cnn.fsdb");
