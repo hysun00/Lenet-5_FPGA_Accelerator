@@ -153,7 +153,7 @@ module PE(rst,
   always @(posedge clk or posedge rst) begin
     if(rst) sum <= 0;
     else begin
-      sum <= (((mul[1]  + mul[2])  + (mul[3]  + mul[4]) ) + 
+      sum <= (((mul[1]  + mul[2])  + (mul[3]  + mul[4]) ) +
               ((mul[5]  + mul[6])  + (mul[7]  + mul[8]) ) +
               ((mul[9]  + mul[10]) + (mul[11] + mul[12])) +
               ((mul[13] + mul[14]) + (mul[15] + mul[16])) +
@@ -164,6 +164,9 @@ module PE(rst,
   end
 
   assign relu_out = (relu_en) ? ((sum < 0) ? 0 : sum) : sum;
-  assign pe_out = (quan_en) ? ((relu_out[15]) ? 255 : (relu_out[14:7] + relu_out[6])) : relu_out; 
+  assign pe_out = (quan_en) ? ((relu_out[15]) ? 255 : 
+                  ((&relu_out[14:7]) ? relu_out[14:7] : 
+                  (relu_out[14:7] + relu_out[6]))) : 
+                  relu_out; 
 
 endmodule

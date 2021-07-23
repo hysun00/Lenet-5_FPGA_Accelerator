@@ -468,10 +468,10 @@ module cnn(clk,
     end
     else begin
       if(shift_sram_en) begin
-        for(j = 0; j < 8; j=j+1) pe_sram[j][0] <= pe_out[j];
+        for(j = 0; j < 8; j=j+1) pe_sram[j][3] <= pe_out[j];
         for(j = 0; j < 8; j=j+1) begin
-          for(i = 0; i < 3; i=i+1) begin
-            pe_sram[j][i+1] <= pe_sram[j][i];
+          for(i = 3; i > 0; i=i-1) begin
+            pe_sram[j][i-1] <= pe_sram[j][i];
           end
         end
       end // if-end
