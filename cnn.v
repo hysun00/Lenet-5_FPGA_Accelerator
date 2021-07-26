@@ -13,10 +13,7 @@ module cnn(clk,
            BRAM_TEMP_WE, 
            BRAM_IF_EN, 
            BRAM_W_EN, 
-           BRAM_TEMP_EN, 
-           BRAM_IF_RST, 
-           BRAM_W_RST, 
-           BRAM_TEMP_RST, 
+           BRAM_TEMP_EN,
            BRAM_IF_DOUT, 
            BRAM_W_DOUT, 
            BRAM_TEMP_DOUT, 
@@ -31,13 +28,15 @@ module cnn(clk,
   output [`DATA_BITS-1:0] BRAM_IF_ADDR, BRAM_W_ADDR, BRAM_TEMP_ADDR; // address
   output [3:0] BRAM_IF_WE, BRAM_W_WE, BRAM_TEMP_WE; // write or read
   output BRAM_IF_EN, BRAM_W_EN, BRAM_TEMP_EN; // enable
-  output BRAM_IF_RST, BRAM_W_RST, BRAM_TEMP_RST;  // reset
   input  [`DATA_BITS-1:0] BRAM_IF_DOUT, BRAM_W_DOUT, BRAM_TEMP_DOUT; // data out
   output [`DATA_BITS-1:0] BRAM_IF_DIN, BRAM_W_DIN, BRAM_TEMP_DIN; // data in
 
   integer i, j;
-
-  reg [`DATA_BITS-1:0] BRAM_W_ADDR, BRAM_TEMP_ADDR;
+  wire [31:0] BRAM_IF_ADDR_temp;
+  reg [`DATA_BITS-1:0] BRAM_W_ADDR_temp, BRAM_TEMP_ADDR_temp;
+  assign BRAM_IF_ADDR = BRAM_IF_ADDR_temp << 2;
+  assign BRAM_W_ADDR = BRAM_W_ADDR_temp << 2;
+  assign BRAM_TEMP_ADDR = BRAM_TEMP_ADDR_temp << 2;
 
   reg [7:0] pe_pre_in [0:24];
 
@@ -75,10 +74,11 @@ module cnn(clk,
   //           fc2   = 5;
 
   // FSM:
+  //==================== Layer 1 =======================================================
   parameter IDLE        = 0,
             RD_BRTCH1   = 1,    // read bram to cache (16 cycle)
             RD_BRTCH2   = 2,    // read bram to cache (34 cycle) total 50 cycle (weight)
-            RD_BRTCH3   = 3,
+            RD_BRTCH3   = 3,    // read 6 * 8
             READ24      = 4,
             READ_TILE1  = 5,
             READ_TILE2  = 6,
@@ -95,11 +95,13 @@ module cnn(clk,
             WRITE_TEMP  = 17,
             DONE        = 18;
 
+  
+
   assign done = (state == DONE);
 
-  assign BRAM_IF_EN = (state == IDLE || state == RD_BRTCH1 || state == RD_BRTCH2 || state == RD_BRTCH3 || state == READ24);
-  assign BRAM_W_EN  = (state == IDLE || state == RD_BRTCH1 || state == RD_BRTCH2 || state == READ24);
-  assign BRAM_TEMP_EN = (state == WRITE_TEMP);
+  assign BRAM_IF_EN = 1;
+  assign BRAM_W_EN  = 1;
+  assign BRAM_TEMP_EN = 1;
 
   assign BRAM_IF_WE = 4'b0000;
   assign BRAM_W_WE = 4'b0000;
@@ -136,8 +138,8 @@ module cnn(clk,
       EXE2:        n_state = (counter == 2) ? MX_PL2 : EXE2;
       MX_PL1:      n_state = (counter == 5) ? READ_TILE3 : MX_PL1;  // repeat 6 times -> RD_BRTCH1
       MX_PL2:      n_state = (counter == 5) ? WRITE_TEMP : MX_PL2;
-      WRITE_TEMP:  n_state = (BRAM_TEMP_ADDR == 293) ? DONE : ((counter == 2) ? ((cnt_rd24 == 6) ? RD_BRTCH3 : READ24) : WRITE_TEMP);
-      DONE:        n_state = IDLE;
+      WRITE_TEMP:  n_state = (BRAM_TEMP_ADDR_temp == 293) ? DONE : ((counter == 2) ? ((cnt_rd24 == 6) ? RD_BRTCH3 : READ24) : WRITE_TEMP);
+      DONE:        n_state = DONE;
       default:     n_state = IDLE;
     endcase
   end
@@ -225,10 +227,10 @@ module cnn(clk,
 
   // BRAM_TEMP_ADDR (在mxpl state 就要將data準備好)
   always @(posedge clk or posedge rst) begin
-    if(rst) BRAM_TEMP_ADDR <= 0;
+    if(rst) BRAM_TEMP_ADDR_temp <= 0;
     else begin
       if(state == WRITE_TEMP) begin
-        BRAM_TEMP_ADDR <= BRAM_TEMP_ADDR + 1;
+        BRAM_TEMP_ADDR_temp <= BRAM_TEMP_ADDR_temp + 1;
       end
     end
   end
@@ -256,7 +258,7 @@ module cnn(clk,
     end
   end
 
-  assign BRAM_IF_ADDR = base_addr_r + base_addr_c + {y, x};
+  assign BRAM_IF_ADDR_temp = base_addr_r + base_addr_c + {y, x};
 
   always @(posedge clk or posedge rst) begin
     if(rst) base_addr_r <= 0;
@@ -286,9 +288,9 @@ module cnn(clk,
 
   // BRAM_W_ADDR: 25 * 8
   always @(posedge clk or posedge rst) begin
-    if(rst) BRAM_W_ADDR <= 0;
+    if(rst) BRAM_W_ADDR_temp <= 0;
     else begin
-      if(state == RD_BRTCH1 || state == RD_BRTCH2 || state == RD_BRTCH3) BRAM_W_ADDR <= BRAM_W_ADDR + 1;
+      if(state == RD_BRTCH1 || state == RD_BRTCH2 || state == RD_BRTCH3) BRAM_W_ADDR_temp <= BRAM_W_ADDR_temp + 1;
     end
   end
 
