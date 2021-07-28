@@ -12,68 +12,84 @@ module cnn_tb;
   wire done;
 
   integer err, i;
-  wire [31:0] BRAM_IF_ADDR, BRAM_W_ADDR, BRAM_TEMP_ADDR;
-  wire [3:0] BRAM_IF_WE, BRAM_W_WE, BRAM_TEMP_WE;
-  wire BRAM_IF_EN, BRAM_W_EN, BRAM_TEMP_EN;
-  wire [31:0] BRAM_IF_DOUT, BRAM_W_DOUT, BRAM_TEMP_DOUT;
-  wire [31:0] BRAM_IF_DIN, BRAM_W_DIN, BRAM_TEMP_DIN;
+  wire [31:0] BRAM_IF1_ADDR, BRAM_W1_ADDR, BRAM_IF2_ADDR, BRAM_W2_ADDR;
+  wire [3:0] BRAM_IF1_WE, BRAM_W1_WE, BRAM_W2_WE, BRAM_IF2_WE;
+  wire BRAM_IF1_EN, BRAM_W1_EN, BRAM_W2_EN, BRAM_IF2_EN;
+  wire [31:0] BRAM_IF1_DOUT, BRAM_W1_DOUT, BRAM_W2_DOUT, BRAM_IF2_DOUT;
+  wire [31:0] BRAM_IF1_DIN, BRAM_W1_DIN, BRAM_W2_DIN, BRAM_IF2_DIN;
 
   cnn cnn(
     .clk(clk),
     .rst(rst),
     .start(start),
     .done(done),
-    .BRAM_IF_ADDR(BRAM_IF_ADDR),
-    .BRAM_W_ADDR(BRAM_W_ADDR),
-    .BRAM_TEMP_ADDR(BRAM_TEMP_ADDR),
-    .BRAM_IF_WE(BRAM_IF_WE),
-    .BRAM_W_WE(BRAM_W_WE),
-    .BRAM_TEMP_WE(BRAM_TEMP_WE),
-    .BRAM_IF_EN(BRAM_IF_EN),
-    .BRAM_W_EN(BRAM_W_EN),
-    .BRAM_TEMP_EN(BRAM_TEMP_EN),
-    .BRAM_IF_DOUT(BRAM_IF_DOUT),
-    .BRAM_W_DOUT(BRAM_W_DOUT),
-    .BRAM_TEMP_DOUT(BRAM_TEMP_DOUT),
-    .BRAM_IF_DIN(BRAM_IF_DIN),
-    .BRAM_W_DIN(BRAM_W_DIN),
-    .BRAM_TEMP_DIN(BRAM_TEMP_DIN)
+    .BRAM_IF1_ADDR(BRAM_IF1_ADDR),
+    .BRAM_IF2_ADDR(BRAM_IF2_ADDR),
+    .BRAM_W1_ADDR(BRAM_W1_ADDR),
+    .BRAM_W2_ADDR(BRAM_W2_ADDR),
+    .BRAM_IF1_WE(BRAM_IF1_WE),
+    .BRAM_IF2_WE(BRAM_IF2_WE),
+    .BRAM_W1_WE(BRAM_W1_WE),
+    .BRAM_W2_WE(BRAM_W2_WE),
+    .BRAM_IF1_EN(BRAM_IF1_EN),
+    .BRAM_IF2_EN(BRAM_IF2_EN),
+    .BRAM_W1_EN(BRAM_W1_EN),
+    .BRAM_W2_EN(BRAM_W2_EN),
+    .BRAM_IF1_DOUT(BRAM_IF1_DOUT),
+    .BRAM_IF2_DOUT(BRAM_IF2_DOUT),
+    .BRAM_W1_DOUT(BRAM_W1_DOUT),
+    .BRAM_W2_DOUT(BRAM_W2_DOUT),
+    .BRAM_IF1_DIN(BRAM_IF1_DIN),
+    .BRAM_IF2_DIN(BRAM_IF2_DIN),
+    .BRAM_W1_DIN(BRAM_W1_DIN),
+    .BRAM_W2_DIN(BRAM_W2_DIN)
   );
 
-  bram bram_w(
+  bram bram_w1(
     .clk(clk),
     .rst(rst),
-    .wen(BRAM_W_WE),
-    .addr(BRAM_W_ADDR),
-    .en(BRAM_W_EN),
-    .dout(BRAM_W_DOUT),
-    .din(BRAM_W_DIN)
+    .wen(BRAM_W1_WE),
+    .addr(BRAM_W1_ADDR),
+    .en(BRAM_W1_EN),
+    .dout(BRAM_W1_DOUT),
+    .din(BRAM_W1_DIN)
+  );
+
+  
+  bram bram_w2(
+    .clk(clk),
+    .rst(rst),
+    .wen(BRAM_W2_WE),
+    .addr(BRAM_W2_ADDR),
+    .en(BRAM_W2_EN),
+    .dout(BRAM_W2_DOUT),
+    .din(BRAM_W2_DIN)
   );
 
 
-  bram bram_tmp(
+  bram bram_if2(
     .clk(clk),
     .rst(rst),
-    .wen(BRAM_TEMP_WE),
-    .addr(BRAM_TEMP_ADDR),
-    .en(BRAM_TEMP_EN),
-    .dout(BRAM_TEMP_DOUT),
-    .din(BRAM_TEMP_DIN)
+    .wen(BRAM_IF2_WE),
+    .addr(BRAM_IF2_ADDR),
+    .en(BRAM_IF2_EN),
+    .dout(BRAM_IF2_DOUT),
+    .din(BRAM_IF2_DIN)
   );
 
-  bram bram_f(
+  bram bram_if1(
     .clk(clk),
     .rst(rst),
-    .wen(BRAM_IF_WE),
-    .addr(BRAM_IF_ADDR),
-    .en(BRAM_IF_EN),
-    .dout(BRAM_IF_DOUT),
-    .din(BRAM_IF_DIN)
+    .wen(BRAM_IF1_WE),
+    .addr(BRAM_IF1_ADDR),
+    .en(BRAM_IF1_EN),
+    .dout(BRAM_IF1_DOUT),
+    .din(BRAM_IF1_DIN)
   );
 
   reg [31:0] GOLDEN [0:293];
-  reg [31:0] mem1 [0:50];
-  reg [31:0] mem2 [0:255];
+  // reg [31:0] mem1 [0:50];
+  // reg [31:0] mem2 [0:255];
   initial begin
     clk = 0; rst = 1;
     start = 0;
@@ -81,20 +97,20 @@ module cnn_tb;
     #20 start = 1;
     #10 start = 0;
     wait(done);
+    $display("\n============ Done ===================\n");
     $timeformat(-9, 2, " ns", 10); 
     $display("\nSimulation time = %t\n",$time);
     #(`CYCLE*2)
-    $display("\n============ Done ===================\n");
     $display("\n======== Check start ================\n");
     err = 0;
 
-    for (i = 0; i < 294; i=i+1) begin
-      if(bram_tmp.mem[i] !== GOLDEN[i])begin
-        $display("DM[%4d] = %h, expect = %h", i, bram_tmp.mem[i], GOLDEN[i]);
+    for (i = 0; i < 100; i=i+1) begin // 100 
+      if(bram_if1.mem[i] !== GOLDEN[i])begin
+        $display("DM[%4d] = %h, expect = %h", i, bram_if1.mem[i], GOLDEN[i]);
         err = err + 1;
       end
       else begin
-        $display("DM[%4d] = %h, pass",  i, bram_tmp.mem[i]);
+        $display("DM[%4d] = %h, pass",  i, bram_if1.mem[i]);
       end
       
     end
@@ -130,13 +146,16 @@ module cnn_tb;
 
   initial begin
     `ifdef number
-      $readmemh("./number/number_conv1_32.hex", bram_w.mem);
-      $readmemh("./number/number_conv1_32_in.hex", bram_f.mem);
-      $readmemh("./number/number_conv1_32_out.hex", GOLDEN, 0);
+      $readmemh("./number/number_conv1_32.hex", bram_w1.mem);
+      $readmemh("./number/number_conv2_32.hex", bram_w2.mem);
+      $readmemh("./number/number_conv1_32_in.hex", bram_if1.mem);
+      //$readmemh("./number/number_conv1_32_out.hex", GOLDEN, 0);
+      $readmemh("./number/number_conv2_32_out.hex", GOLDEN, 0);
     `elsif letter
-      $readmemh("./letter/letter_conv1_32_w.hex", bram_w.mem);
-      $readmemh("./letter/letter_conv1_32_in.hex", bram_f.mem);
-      $readmemh("./letter/letter_conv1_32_out.hex", GOLDEN, 0);
+      $readmemh("./letter/letter_conv1_32_w.hex", bram_w1.mem);
+      $readmemh("./letter/letter_conv2_32_w.hex", bram_w2.mem);
+      $readmemh("./letter/letter_conv1_32_in.hex", bram_if1.mem);
+      $readmemh("./letter/letter_conv2_32_out.hex", GOLDEN, 0);
     `endif
   end
 	
