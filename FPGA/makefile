@@ -1,5 +1,5 @@
-FILE1 := $(PWD)/number/number_conv1_32_out.hex
-FILE2 := $(PWD)/number_conv1_32_temp.hex
+FILE1 := $(PWD)/number_conv2_32_out.hex
+FILE2 := $(PWD)/cnn_output_number.hex
 
 diff:
-	-diff $(FILE1) $(FILE2) -y || exit 0
+	-diff $(FILE1) $(FILE2) -u || exit 0
