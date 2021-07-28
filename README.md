@@ -4,6 +4,6 @@
 * Auther: 
     - Jack from NCKUEE
     - Charley from NCKUES
-* Tools:  PYNQ Z2, Vivado
+* Tools:  PYNQ Z2, Vivado, Jupyter notebook
 * Programming language: Python, Verilog
 * Archetecture:
