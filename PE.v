@@ -3,6 +3,7 @@ module PE(rst,
           pe_out,
           relu_en,
           quan_en,
+          psum,
           in_IF1,
           in_IF2,
           in_IF3,
@@ -60,6 +61,7 @@ module PE(rst,
   input relu_en;
   input quan_en;
   output [31:0] pe_out; // if quantize, pe_out will be 8 bits ([14:7]) or 32 bits
+  input  [31:0] psum;
   input [7:0] in_IF1;
   input [7:0] in_IF2;
   input [7:0] in_IF3;
@@ -159,12 +161,12 @@ module PE(rst,
               ((mul[13] + mul[14]) + (mul[15] + mul[16])) +
               ((mul[17] + mul[18]) + (mul[19] + mul[20])) +
               ((mul[21] + mul[22]) + (mul[23] + mul[24])) +
-               mul[0]);
+               (mul[0]  + psum));
     end
   end
 
   assign relu_out = (relu_en) ? ((sum < 0) ? 0 : sum) : sum;
-  assign pe_out = (quan_en) ? ((relu_out[15]) ? 255 : 
+  assign pe_out = (quan_en) ? (|(relu_out[31:15]) ? 255 : 
                   ((&relu_out[14:7]) ? relu_out[14:7] : 
                   (relu_out[14:7] + relu_out[6]))) : 
                   relu_out; 
