@@ -8,7 +8,7 @@ module bram(clk, rst, dout, addr, en, din, wen);
   input  en;
   input  [31:0] din;
   wire [31:0] addrW;
-  reg [31:0] mem [0:10000];
+  reg [31:0] mem [0:50000];
 
   always @(posedge clk) begin
     if(wen == 4'b1111 && en) mem[addrW] <= din;
