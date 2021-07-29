@@ -6,4 +6,4 @@
     - Charley from NCKUES
 * Tools:  PYNQ Z2, Vivado, Jupyter notebook
 * Programming language: Python, Verilog
-* Archetecture:
+* Architecture:
