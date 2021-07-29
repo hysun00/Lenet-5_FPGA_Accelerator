@@ -10,45 +10,50 @@ module cnn(clk,
            BRAM_W1_ADDR, 
            BRAM_W2_ADDR,
            BRAM_W3_ADDR,
+           BRAM_W4_ADDR,
            BRAM_IF1_WE, 
            BRAM_IF2_WE, 
            BRAM_W1_WE,
            BRAM_W2_WE, 
            BRAM_W3_WE,
+           BRAM_W4_WE,
            BRAM_IF1_EN, 
            BRAM_IF2_EN,
            BRAM_W1_EN,
            BRAM_W2_EN, 
            BRAM_W3_EN,
+           BRAM_W4_EN,
            BRAM_IF1_DOUT, 
            BRAM_IF2_DOUT, 
            BRAM_W1_DOUT,
            BRAM_W2_DOUT, 
            BRAM_W3_DOUT, 
+           BRAM_W4_DOUT, 
            BRAM_IF1_DIN, 
            BRAM_IF2_DIN,
            BRAM_W1_DIN, 
            BRAM_W2_DIN,
-           BRAM_W3_DIN
+           BRAM_W3_DIN,
+           BRAM_W4_DIN
 );
   input clk;
   input rst;
   input start;
   output done;
-  output [`DATA_BITS-1:0] BRAM_IF1_ADDR, BRAM_W1_ADDR, BRAM_IF2_ADDR, BRAM_W2_ADDR, BRAM_W3_ADDR; // address
-  output [3:0] BRAM_IF1_WE, BRAM_W1_WE, BRAM_IF2_WE, BRAM_W2_WE, BRAM_W3_WE; // write or read
-  output BRAM_IF1_EN, BRAM_W1_EN, BRAM_IF2_EN, BRAM_W2_EN, BRAM_W3_EN; // enable
-  input  [`DATA_BITS-1:0] BRAM_IF1_DOUT, BRAM_W1_DOUT, BRAM_IF2_DOUT, BRAM_W2_DOUT, BRAM_W3_DOUT; // data out
-  output [`DATA_BITS-1:0] BRAM_IF1_DIN, BRAM_W1_DIN, BRAM_IF2_DIN, BRAM_W2_DIN, BRAM_W3_DIN; // data in
+  output [`DATA_BITS-1:0] BRAM_IF1_ADDR, BRAM_W1_ADDR, BRAM_IF2_ADDR, BRAM_W2_ADDR, BRAM_W3_ADDR, BRAM_W4_ADDR; // address
+  output [3:0] BRAM_IF1_WE, BRAM_W1_WE, BRAM_IF2_WE, BRAM_W2_WE, BRAM_W3_WE, BRAM_W4_WE; // write or read
+  output BRAM_IF1_EN, BRAM_W1_EN, BRAM_IF2_EN, BRAM_W2_EN, BRAM_W3_EN, BRAM_W4_EN; // enable
+  input  [`DATA_BITS-1:0] BRAM_IF1_DOUT, BRAM_W1_DOUT, BRAM_IF2_DOUT, BRAM_W2_DOUT, BRAM_W3_DOUT, BRAM_W4_DOUT; // data out
+  output [`DATA_BITS-1:0] BRAM_IF1_DIN, BRAM_W1_DIN, BRAM_IF2_DIN, BRAM_W2_DIN, BRAM_W3_DIN, BRAM_W4_DIN; // data in
 
   integer i, j;
   wire [`DATA_BITS-1:0] L1_BRAM_IF1_ADDR_temp, L3_BRAM_IF1_ADDR_temp;
   wire [`DATA_BITS-1:0] L2_bram_IF2_addr;
   reg  [`DATA_BITS-1:0] BRAM_W1_ADDR_temp, BRAM_IF2_ADDR_temp;
   reg  [`DATA_BITS-1:0] BRAM_IF1_ADDR, BRAM_IF2_ADDR;
-  reg  [`DATA_BITS-1:0] BRAM_W2_ADDR_temp, BRAM_W3_ADDR_temp, L2_BRAM_IF1_ADDR_temp;
+  reg  [`DATA_BITS-1:0] BRAM_W2_ADDR_temp, BRAM_W3_ADDR_temp, BRAM_W4_ADDR_temp, L2_BRAM_IF1_ADDR_temp;
   
-  reg [5:0] state, n_state; // 0 ~ 63
+  reg  [5:0] state, n_state; // 0 ~ 63
   reg  [2:0]  layer; // 1 ~ 5
   reg  [7:0]  pe_pre_in       [0:24];
   reg  [7:0]  pe_in           [0:199]; // 200 * 8 = 1600
@@ -63,13 +68,14 @@ module cnn(clk,
 
   reg [31:0] psum_temp [0:7][0:99]; // 10 * 10 * 8
   reg [6:0]  psum_temp_indx; // 0 ~ 100
+  reg signed [31:0] pe_out_sum;
 
   reg [2:0] x, y; // 8 * 8
   reg [3:0] base_addr_r; 
   reg [7:0] base_addr_c;
 
   reg [2:0] cnt_rd_new;
-  reg [5:0] counter;
+  reg [5:0] counter; // 0 ~ 63
   reg [3:0] channel_cnt;
 
   reg [7:0] temp1;
@@ -80,6 +86,9 @@ module cnn(clk,
 
   wire [7:0] L2_ifmp_indx; 
   wire [4:0] L3_ifmp_indx; 
+
+  wire [31:0] pe_out_sum_relu;
+  wire [31:0] pe_out_sum_quan;
   
   always @(*) begin // for conv1/conv3 input & conv2 output
     if(layer == 1) BRAM_IF1_ADDR = L1_BRAM_IF1_ADDR_temp << 2;      // input addr
@@ -91,6 +100,7 @@ module cnn(clk,
   assign BRAM_W1_ADDR = BRAM_W1_ADDR_temp << 2;
   assign BRAM_W2_ADDR = BRAM_W2_ADDR_temp << 2;
   assign BRAM_W3_ADDR = BRAM_W3_ADDR_temp << 2;
+  assign BRAM_W4_ADDR = BRAM_W4_ADDR_temp << 2;
 
   always @(*) begin
     if(layer == 1) BRAM_IF2_ADDR = BRAM_IF2_ADDR_temp << 2;
@@ -139,8 +149,19 @@ module cnn(clk,
             L3_RD_BRTCH2  = 32,
             L3_RD_BRTCH3  = 33,
             L3_EXE        = 34,
-            L3_DONE       = 35,
-            DONE          = 36;
+            L3_DONE       = 35;
+
+  //==================== Layer 4 =======================================================     
+  parameter L4_RST        = 36,
+            L4_RD_BRTCH1  = 37,
+            L4_EXE        = 38,
+            L4_SUM        = 39,
+            L4_OUT        = 40;
+  
+  //==================== Layer 5 =======================================================     
+  parameter L5_RST        = 41,
+            DONE          = 42;
+            
             
   // next state logic
   always @(*) begin
@@ -185,7 +206,17 @@ module cnn(clk,
       L3_RD_BRTCH2:  n_state = (counter == 24) ? L3_EXE : L3_RD_BRTCH2;
       L3_RD_BRTCH3:  n_state = (counter == 50) ? L3_EXE : L3_RD_BRTCH3;
       L3_EXE:        n_state = (counter == 1)  ? ((psum_temp_indx == 14) ? ((channel_cnt == 15) ? L3_DONE : L3_RD_BRTCH1) : L3_RD_BRTCH3) : L3_EXE;
-      L3_DONE:       n_state = DONE;
+      L3_DONE:       n_state = L4_RST;
+
+      //======================= Layer 4 ===========================================================================================================
+      L4_RST:        n_state = L4_RD_BRTCH1;
+      L4_RD_BRTCH1:  n_state = (counter == 30) ? L4_EXE : L4_RD_BRTCH1;
+      L4_EXE:        n_state = (counter == 1) ? L4_SUM : L4_EXE;
+      L4_SUM:        n_state = L4_OUT;
+      L4_OUT:        n_state = (psum_temp_indx == 99) ? L5_RST : L4_RD_BRTCH1;
+              
+      //======================= Layer 5 ===========================================================================================================
+      L5_RST:        n_state = DONE;
       DONE:          n_state = DONE;
       default:       n_state = IDLE;
     endcase
@@ -209,9 +240,14 @@ module cnn(clk,
       L2_READ_TILE6, L2_EXE, L2_MX_PL, L2_WRITE_TEMP: layer = 2;
 
       //================================== Layer 3 ==================================================================
-      L3_RST, L3_RD_BRTCH1, L3_RD_BRTCH2, L3_RD_BRTCH3, L3_EXE, L3_DONE : layer = 3;
+      L3_RST, L3_RD_BRTCH1, L3_RD_BRTCH2, L3_RD_BRTCH3, L3_EXE, L3_DONE: layer = 3;
 
       //================================== Layer 4 ==================================================================
+      L4_RST, L4_RD_BRTCH1, L4_EXE, L4_SUM, L4_OUT: layer = 4;
+
+      //================================== Layer 5 ==================================================================
+      L5_RST: layer = 5;
+      
       default: layer = 0;
     endcase
   end
@@ -219,15 +255,18 @@ module cnn(clk,
   assign done = (state == DONE);
   assign relu_en = (layer == 1 || (layer == 2 && channel_cnt == 5) || (layer == 3 && channel_cnt == 15 && !(counter == 0 && state == L3_RD_BRTCH1))) ? 1 : 0;
   assign quan_en = (layer == 1 || (layer == 2 && channel_cnt == 5) || (layer == 3 && channel_cnt == 15 && !(counter == 0 && state == L3_RD_BRTCH1))) ? 1 : 0;
+
   assign BRAM_W1_EN  = 1;
   assign BRAM_W2_EN  = 1;
   assign BRAM_W3_EN  = 1;
+  assign BRAM_W4_EN  = 1;
   assign BRAM_IF1_EN = 1;
   assign BRAM_IF2_EN = 1;
 
   assign BRAM_W1_WE  = 4'b0000;
   assign BRAM_W2_WE  = 4'b0000;
   assign BRAM_W3_WE  = 4'b0000;
+  assign BRAM_W4_WE  = 4'b0000;
   assign BRAM_IF1_WE = (state == L2_WRITE_TEMP) ? 4'b1111 : 4'b0000;
   assign BRAM_IF2_WE = (state == L1_WRITE_TEMP) ? 4'b1111 : 4'b0000;
 
@@ -257,10 +296,12 @@ module cnn(clk,
   assign L3_counter_flag = (state == L3_RD_BRTCH1 && counter <= 24) || (state == L3_RD_BRTCH2 && counter <= 23) || (state == L3_RD_BRTCH3 && counter <= 49) || 
                            (state == L3_EXE && counter <= 0);
                            
+  assign L4_counter_flag = (state == L4_RD_BRTCH1 && counter <= 29) || (state == L4_EXE && counter <= 0);
+
   always @(posedge clk or posedge rst) begin
     if(rst) counter <= 0;
     else begin
-      if(L1_counter_flag || L2_counter_flag || L3_counter_flag) counter <= counter + 1;
+      if(L1_counter_flag || L2_counter_flag || L3_counter_flag || L4_counter_flag) counter <= counter + 1;
       else counter <= 0; 
     end
   end
@@ -393,16 +434,17 @@ module cnn(clk,
 
 
   always @(posedge clk or posedge rst) begin
-    if(rst) begin
-      for(i = 0; i < 200; i=i+1) w_cache[i] <= 0; 
-    end
+    if(rst) for(i = 0; i < 200; i=i+1) w_cache[i] <= 0; 
     else begin
       if((state == L1_RD_BRTCH1 && counter != 0) || state == L1_RD_BRTCH2) 
         {w_cache[wcache_indx], w_cache[wcache_indx+1], w_cache[wcache_indx+2], w_cache[wcache_indx+3]} <= BRAM_W1_DOUT; // 4 data in 1 row => 50 cycle
       else if((state == L2_RD_BRTCH1 && counter != 0) || state == L2_RD_BRTCH2) 
         {w_cache[wcache_indx], w_cache[wcache_indx+1], w_cache[wcache_indx+2], w_cache[wcache_indx+3]} <= BRAM_W2_DOUT; 
       else if((state == L3_RD_BRTCH1 && counter != 0) || state == L3_RD_BRTCH2 || (state == L3_RD_BRTCH3 && counter != 0)) 
-        {w_cache[wcache_indx], w_cache[wcache_indx+1], w_cache[wcache_indx+2], w_cache[wcache_indx+3]} <= BRAM_W3_DOUT; 
+        {w_cache[wcache_indx], w_cache[wcache_indx+1], w_cache[wcache_indx+2], w_cache[wcache_indx+3]} <= BRAM_W3_DOUT;
+      else if(state == L4_RST) for(i = 0; i < 200; i=i+1) w_cache[i] <= 0;
+      else if(state == L4_RD_BRTCH1 && counter != 0)
+        {w_cache[wcache_indx], w_cache[wcache_indx+1], w_cache[wcache_indx+2], w_cache[wcache_indx+3]} <= BRAM_W4_DOUT; 
     end
   end
 
@@ -430,6 +472,13 @@ module cnn(clk,
   end
 
   always @(posedge clk or posedge rst) begin
+    if(rst) BRAM_W4_ADDR_temp <= 0;
+    else begin
+      if(state == L4_RD_BRTCH1 && counter <= 29) BRAM_W4_ADDR_temp <= BRAM_W4_ADDR_temp + 1;
+    end
+  end
+
+  always @(posedge clk or posedge rst) begin
     if(rst) L2_BRAM_IF1_ADDR_temp <= 0;
     else begin
       if(state == L2_WRITE_TEMP) begin
@@ -446,9 +495,8 @@ module cnn(clk,
   always @(posedge clk or posedge rst) begin
     if(rst) wcache_indx <= 0;
     else begin
-      if((state == L1_RD_BRTCH1 && counter != 0) || state == L1_RD_BRTCH2 ||
-         (state == L2_RD_BRTCH1 && counter != 0) || state == L2_RD_BRTCH2 || 
-         (state == L3_RD_BRTCH1 && counter != 0) || state == L3_RD_BRTCH2 || (state == L3_RD_BRTCH3 && counter != 0)) wcache_indx <= wcache_indx + 4;
+      if(((state == L1_RD_BRTCH1 || state == L2_RD_BRTCH1 || state == L3_RD_BRTCH1 || state == L3_RD_BRTCH3 || state == L4_RD_BRTCH1) && counter != 0) || 
+           state == L1_RD_BRTCH2 || state == L2_RD_BRTCH2 || state == L3_RD_BRTCH2) wcache_indx <= wcache_indx + 4;
       else wcache_indx <= 0;
     end
   end
@@ -571,17 +619,34 @@ module cnn(clk,
             pe_sram[j][i-1] <= pe_sram[j][i];
           end
         end
-      end // if-end
+      end 
     end
   end
 
   // ======================================= PE input control =========================================================
   always @(*) begin
-    for(j = 0; j < 176; j=j+25) begin
-      for(i = 0; i < 25; i=i+1) begin
-        pe_in[i+j] = pe_pre_in[i]; // layer = 1, 2, 3
+    if(layer == 1 || layer == 2 || layer == 3) begin
+      for(j = 0; j < 176; j=j+25) begin
+        for(i = 0; i < 25; i=i+1) begin
+          pe_in[i+j] = pe_pre_in[i]; 
+        end
       end
     end
+    else if(layer == 4 && ~(state == L4_RST))begin
+      for(j = 0; j < 15; j=j+1) begin
+        for(i = 0; i < 8; i=i+1) begin
+          pe_in[i+8*j] = psum_temp[i][j]; 
+        end
+      end
+    end
+    else if(layer == 5) for(i = 0; i < 84; i=i+1) pe_in[i] = psum_temp[0][i];
+    else begin
+      for(j = 0; j < 176; j=j+25) begin
+        for(i = 0; i < 25; i=i+1) begin
+          pe_in[i+j] = 0;
+        end
+      end
+    end 
   end
 
   reg [31:0] psum_in [0:7];
@@ -590,7 +655,7 @@ module cnn(clk,
   always @(posedge clk or posedge rst) begin
     if(rst) for(i = 0; i < 8; i=i+1) psum_in[i] <= 0;
     else begin 
-      if(layer == 1 || state == L3_RST) for(i = 0; i < 8; i=i+1) psum_in[i] <= 0;
+      if(layer == 1 || state == L3_RST || layer == 4 || layer == 5) for(i = 0; i < 8; i=i+1) psum_in[i] <= 0;
       else if(state == L2_READ_TILE2 || state == L2_READ_TILE5 || state == L2_READ_TILE6 || (state == L2_EXE && counter == 0)) for(i = 0; i < 8; i=i+1) psum_in[i] <= psum_temp[i][psum_in_indx];
       else if(state == L3_EXE && counter == 0 && channel_cnt != 0) for(i = 0; i < 8; i=i+1) psum_in[i] <= psum_temp[i][psum_in_indx];
     end
@@ -673,6 +738,8 @@ module cnn(clk,
         if(psum_temp_indx == 14) psum_temp_indx <= 0;
         else psum_temp_indx <= psum_temp_indx + 1;
       end
+      else if(state == L4_RST) psum_temp_indx <= 16;
+      else if(state == L4_OUT) psum_temp_indx <= psum_temp_indx + 1;
     end
   end
 
@@ -690,9 +757,19 @@ module cnn(clk,
             psum_temp[i][j] <= 0;
         end
       end
-      else if(state == L2_READ_TILE6 || state == L2_EXE || (counter == 0 && ((state == L3_RD_BRTCH1 && channel_cnt != 0) || state == L3_RD_BRTCH3)) || state == L3_DONE) for(i = 0; i < 8; i=i+1) psum_temp[i][psum_temp_indx] <= pe_out[i];
+      else if(state == L2_READ_TILE6 || state == L2_EXE || (counter == 0 && ((state == L3_RD_BRTCH1 && channel_cnt != 0) || state == L3_RD_BRTCH3)) || state == L3_DONE) 
+        for(i = 0; i < 8; i=i+1) psum_temp[i][psum_temp_indx] <= pe_out[i];
+      else if(state == L4_OUT) psum_temp[0][psum_temp_indx] <= pe_out_sum_quan;
     end
   end
+
+  always @(posedge clk or posedge rst) begin
+    if(rst) pe_out_sum <= 0;
+    else if(state == L4_SUM) pe_out_sum <= (pe_out[0] + pe_out[1]) + (pe_out[2] + pe_out[3] + pe_out[4]);
+  end
+  
+  assign pe_out_sum_relu = (pe_out_sum < 0) ? 0 : pe_out_sum;
+  assign pe_out_sum_quan = (|pe_out_sum_relu[31:15]) ? 255 : ((&pe_out_sum_relu[14:7]) ? pe_out_sum_relu[14:7] : (pe_out_sum_relu[14:7] + pe_out_sum_relu[6])); 
 
   // ========================================= PE =====================================================================
   genvar a; 
