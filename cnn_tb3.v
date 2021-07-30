@@ -179,10 +179,10 @@ module cnn_tb;
       $readmemh("./number/number_conv1_32.hex", bram_w1.mem);
       $readmemh("./number/number_conv2_32.hex", bram_w2.mem);
       $readmemh("./number/number_conv3_32.hex", bram_w3.mem);
-      $readmemh("./number/number_conv4_32.hex", bram_w4.mem);
+      $readmemh("./number/number_fc1_32.hex", bram_w4.mem);
       $readmemh("./number/number_conv1_32_in.hex", bram_if1.mem);
       //$readmemh("./number/number_conv1_32_out.hex", GOLDEN, 0);
-      $readmemh("./number/number_conv4_out.hex", GOLDEN, 0);
+      $readmemh("./number/number_fc1_out.hex", GOLDEN, 0);
     `elsif letter
       $readmemh("./letter/letter_conv1_32_w.hex", bram_w1.mem);
       $readmemh("./letter/letter_conv2_32_w.hex", bram_w2.mem);
