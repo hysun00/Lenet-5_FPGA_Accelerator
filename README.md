@@ -36,8 +36,8 @@
 * [2] https://github.com/eecheng87/Convolution
 * [3] https://github.com/WeiCheng14159/MNIST_accelerator
 * [4] NCKU Courses:
-    - AI-ON-CHIP FOR MACHINE LEARNING AND INFERENCE
-    - DEEP LEARNING INTEGRATED CIRCUIT DESIGN AND ACCELERATION
+    - AI-ON-CHIP FOR MACHINE LEARNING AND INFERENCE -- Lectured by Professor Chen Chung-Ho
+    - DEEP LEARNING INTEGRATED CIRCUIT DESIGN AND ACCELERATION -- Lectured by Professor Lin Ing-Chao
 * [5] LeCun, Yann  (1998), "Gradient-Based Learning Applied to Document Recognition"
 * [6] Dai Rongshi  (2019), "Accelerator Implementation of Lenet-5 Convolution Neural Network Based on FPGA with HLS"
 * [7] Yu-Hsin Chen (2017), "Eyeriss: An Energy-Efficient Reconfigurable Accelerator for Deep Convolutional Neural Networks"
