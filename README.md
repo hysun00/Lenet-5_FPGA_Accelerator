@@ -9,6 +9,7 @@
 
 ## Lenet-5 Architecture
 <img src="/Image/Lenet-5_architecture.png"/>
+
 <img src="/Image/Lenet-5.png"/>
 
 ## DLA Architecture
