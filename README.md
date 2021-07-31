@@ -9,7 +9,7 @@
 
 ## Lenet-5 Architecture
 <img src="/Image/lenet-5.png" height="50%" width="50%"/>
-<img src="/Image/lenet-5_architecture.png" height="50%" width="50%"/>
+<img src="/Image/lenet-5_architecture.png"/>
 
 ## DLA
 
