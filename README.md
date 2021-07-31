@@ -11,7 +11,7 @@
 <img src="/Image/Lenet-5.png" height="50%" width="50%"/>
 <img src="/Image/Lenet-5_architecture.png"/>
 
-## DLA
+## DLA Architecture
 
 ## PYNQ-Z2 Utilization
 |Resource                  |Utilization  |Avaliable    |Utilization % |
