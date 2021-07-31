@@ -19,7 +19,7 @@
 |BUFG                      |2            |32           |6.25          |
 
 ![alt text](./Image/Utilization_graph.png)
-<img src="/Image/Utilization_graph.png"/>
+<img src="/Image/Utilization_graph.png" height="60%" width="60%"/>
 
 ## References:
 * [1] https://github.com/ChrisZonghaoLi/Rudi_CNN_Conv_Accelerator
