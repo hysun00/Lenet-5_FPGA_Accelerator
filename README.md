@@ -26,7 +26,7 @@
 <img src="/Image/Utilization_graph.png" height="50%" width="50%"/>
 
 ## PYNQ-Z2 Power
-<img src="/Image/power.png" height="50%" width="50%"/>
+<img src="/Image/power.png"/>
 
 ## Performance
 
