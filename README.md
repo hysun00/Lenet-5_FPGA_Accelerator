@@ -12,6 +12,10 @@
 
 <img src="/Image/Lenet-5.png"/>
 
+## Data format
+* Input image : 8 bits integer
+* Weight : 1 bits integer and 7 bits fraction
+
 ## DLA Architecture
 
 ## PYNQ-Z2 Utilization
