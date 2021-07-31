@@ -6,7 +6,12 @@
     - Charley from NCKUES
 * Tools:  PYNQ-Z2, Vivado, Jupyter notebook
 * Programming language:  Verilog, Python
-* Architecture:
+
+## Lenet-5 Architecture
+<img src="/Image/lenet-5.png" height="50%" width="50%"/>
+<img src="/Image/lenet-5_architecture.png" height="50%" width="50%"/>
+
+## DLA
 
 ## PYNQ-Z2 Utilization
 |Resource                  |Utilization  |Avaliable    |Utilization % |
@@ -19,7 +24,6 @@
 |BUFG                      |2            |32           |6.25          |
 
 <img src="/Image/Utilization_graph.png" height="50%" width="50%"/>
-<img src="/Image/lenet-5.png" height="50%" width="50%"/>
 
 ## References:
 * [1] https://github.com/ChrisZonghaoLi/Rudi_CNN_Conv_Accelerator
