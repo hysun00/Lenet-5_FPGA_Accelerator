@@ -18,7 +18,6 @@
 |DSP    		           |200          |220          |90.91         |
 |BUFG                      |2            |32           |6.25          |
 
-![image](./Image/Utilization_graph.png)
 <img src="/Image/Utilization_graph.png" height="50%" width="50%"/>
 
 ## References:
