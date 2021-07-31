@@ -1,11 +1,11 @@
 # FPGA-Based Neural Network Acceleration for Handwritten Digits & Alphabets Recognition 
 
 ## This is the graduation project from NCKU EE
-* Auther: 
+* **Auther:** 
     - Jack from NCKUEE
     - Charley from NCKUES
-* Tools:  PYNQ-Z2, Vivado, Jupyter notebook
-* Programming language:  Verilog, Python
+* **Tools:**  PYNQ-Z2, Vivado, Jupyter notebook
+* **Programming language:**  Verilog, Python
 
 ## Lenet-5 Architecture
 <img src="/Image/Lenet-5_architecture.png"/>
@@ -24,6 +24,11 @@
 |BUFG                      |2            |32           |6.25          |
 
 <img src="/Image/Utilization_graph.png" height="50%" width="50%"/>
+
+## PYNQ-Z2 Power
+<img src="/Image/power.png" height="50%" width="50%"/>
+
+## Performance
 
 ## References:
 * [1] https://github.com/ChrisZonghaoLi/Rudi_CNN_Conv_Accelerator
