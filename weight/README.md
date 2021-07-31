@@ -1,4 +1,4 @@
-## Weight arrangement methodology
+## Kernel arrangement methodology
 
 |Parameter |Description  |
 |  -----   | -----       |
