@@ -18,7 +18,7 @@
 |DSP    		           |200          |220          |90.91         |
 |BUFG                      |2            |32           |6.25          |
 
-<img src="/Image/Utilization_graph.png" height="40%" width="40%"/>
+<img src="/Image/Utilization_graph.png" height="50%" width="50%"/>
 
 ## References:
 * [1] https://github.com/ChrisZonghaoLi/Rudi_CNN_Conv_Accelerator
