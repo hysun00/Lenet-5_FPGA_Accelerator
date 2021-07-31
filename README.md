@@ -2,10 +2,10 @@
 
 ## This is the graduation project from NCKU EE
 * **Auther:** 
-    - Jack from NCKUEE
-    - Charley from NCKUES
-* **Tools:**  PYNQ-Z2, Vivado, Jupyter notebook
-* **Programming language:**  Verilog, Python
+    - `Jack` from NCKUEE
+    - `Charley` from NCKUES
+* **Tools:**  `PYNQ-Z2`, `Vivado`, `Jupyter notebook`
+* **Programming language:**  `Verilog`, `Python`
 
 ## Lenet-5 Architecture
 <img src="/Image/Lenet-5_architecture.png"/>
