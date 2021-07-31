@@ -225,7 +225,8 @@ module cnn_tb;
       $readmemh("./letter/letter_conv3_32.hex", bram_w3.mem);
       $readmemh("./letter/letter_fc1_32.hex",   bram_w4.mem);
       $readmemh("./letter/letter_fc2_32.hex",   bram_w5.mem);      
-      $readmemh("./letter/letter_358_in_32.hex", bram_if1.mem);
+      //$readmemh("./letter/letter_358_in_32.hex", bram_if1.mem);
+      $readmemh("./letter/letter_conv1_32_in.hex", bram_if1.mem);
       $readmemh("./letter/letter_fc2_out.hex", GOLDEN, 0);
     `endif
   end
