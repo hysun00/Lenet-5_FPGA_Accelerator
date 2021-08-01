@@ -236,7 +236,7 @@ module cnn(clk,
       L5_EXE:        n_state = (counter == 1)  ? L5_SUM : L5_EXE;
       L5_SUM:        n_state = L5_OUT;
       L5_OUT:        n_state = (mode) ? ((psum_temp_indx == 8) ? DONE : L5_RD_BRTCH1) : ((psum_temp_indx == 26) ? DONE : L5_RD_BRTCH1); // mode = 1: number, mode = 0: letter
-      DONE:          n_state = DONE;
+      DONE:          n_state = IDLE;
 
       default:       n_state = IDLE;
     endcase
