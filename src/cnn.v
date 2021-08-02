@@ -63,7 +63,7 @@ module cnn(clk,
   reg  [`DATA_BITS-1:0] BRAM_IF1_ADDR, BRAM_IF2_ADDR;
   reg  [`DATA_BITS-1:0] BRAM_W2_ADDR_temp, BRAM_W3_ADDR_temp, BRAM_W4_ADDR_temp, L2_BRAM_IF1_ADDR_temp, BRAM_W5_ADDR_temp;
   
-  reg  [5:0] state, n_state; // 0 ~ 63
+  reg  [5:0]  state, n_state; // 0 ~ 63
   reg  [2:0]  layer; // 1 ~ 5
   reg  [7:0]  pe_pre_in       [0:24];
   reg  [7:0]  pe_in           [0:199]; // 200 * 8 = 1600
@@ -302,7 +302,10 @@ module cnn(clk,
   // BRAM_IF2_ADDR (Get data READY in mxpl state) // IF2: for conv2/fc1 input
   always @(posedge clk or posedge rst) begin
     if(rst) BRAM_IF2_ADDR_temp <= 0;
-    else if(state == L1_WRITE_TEMP) BRAM_IF2_ADDR_temp <= BRAM_IF2_ADDR_temp + 1;
+    else begin
+      if(state == IDLE) BRAM_IF2_ADDR_temp <= 0;
+      else if(state == L1_WRITE_TEMP) BRAM_IF2_ADDR_temp <= BRAM_IF2_ADDR_temp + 1;
+    end
   end
 
   // BRAM_IF1_ADDR
@@ -314,7 +317,7 @@ module cnn(clk,
         if(x == 1) x <= 0;
         else x <= x + 1;
       end
-      else if(state == L1_READ_TILE1 || state == L2_READ_TILE1) x <= 0;
+      else if(state == L1_READ_TILE1 || state == L2_READ_TILE1 || state == IDLE) x <= 0;
       else if(state == L2_RD_BRTCH1 || state == L2_RD_BRTCH3) begin
         if(x == 5) x <= 0;
         else x <= x + 1;
@@ -328,7 +331,7 @@ module cnn(clk,
     else begin
       if(((state == L1_RD_BRTCH1 || state == L1_RD_BRTCH3) && x == 1) || state == L1_READ24 || (state == L2_READ12 && x == 1) || ((state == L2_RD_BRTCH1 || state == L2_RD_BRTCH3) && x == 5)) 
         y <= y + 1;
-      else if(state == L1_READ_TILE1 || state == L2_READ_TILE1) y <= 0;
+      else if(state == L1_READ_TILE1 || state == L2_READ_TILE1 || state == IDLE) y <= 0;
     end
   end
 
@@ -337,7 +340,7 @@ module cnn(clk,
     else begin
       if(state == L1_READ_TILE1) base_addr_r <= base_addr_r + 1;
       else if(n_state == L1_READ24 && cnt_rd_new == 0) base_addr_r <= 2; // L1_READ24 first time
-      else if(state == L1_RD_BRTCH1 || state == L1_RD_BRTCH3 || state == L2_RST || base_addr_r == 14) base_addr_r <= 0; 
+      else if(state == L1_RD_BRTCH1 || state == L1_RD_BRTCH3 || state == L2_RST || base_addr_r == 14 || state == IDLE) base_addr_r <= 0; 
       else if(state == L2_READ_TILE1) base_addr_r <= base_addr_r + 2;
       else if(n_state == L2_READ12 && cnt_rd_new == 0) base_addr_r <= 6;
     end
@@ -347,7 +350,7 @@ module cnn(clk,
     if(rst) base_addr_c <= 0;
     else begin
       if(state == L1_READ24 && cnt_rd_new == 6 && counter == 5) base_addr_c <= base_addr_c + 16;
-      else if(state == L2_RST || base_addr_c == 140) base_addr_c <= 0; 
+      else if(state == L2_RST || base_addr_c == 140 || state == IDLE) base_addr_c <= 0; 
       else if(state == L2_READ12 && cnt_rd_new == 4 && counter == 11) base_addr_c <= base_addr_c + 28;
     end
   end
@@ -355,14 +358,18 @@ module cnn(clk,
   // BRAM_W1_ADDR
   always @(posedge clk or posedge rst) begin
     if(rst) BRAM_W1_ADDR_temp <= 0;
-    else if(state == L1_RD_BRTCH1 || state == L1_RD_BRTCH2) BRAM_W1_ADDR_temp <= BRAM_W1_ADDR_temp + 1;
+    else begin
+      if(state == IDLE) BRAM_W1_ADDR_temp <= 0;
+      else if(state == L1_RD_BRTCH1 || state == L1_RD_BRTCH2) BRAM_W1_ADDR_temp <= BRAM_W1_ADDR_temp + 1;
+    end
   end
   
   // BRAM_W2_ADDR 
   always @(posedge clk or posedge rst) begin
     if(rst) BRAM_W2_ADDR_temp <= 0;
     else begin
-      if(state == L2_RD_BRTCH2 && counter == 13) BRAM_W2_ADDR_temp <= BRAM_W2_ADDR_temp + 50; 
+      if(state == IDLE) BRAM_W2_ADDR_temp <= 0;
+      else if(state == L2_RD_BRTCH2 && counter == 13) BRAM_W2_ADDR_temp <= BRAM_W2_ADDR_temp + 50; 
       else if(state == L2_RD_BRTCH1 || state == L2_RD_BRTCH2) BRAM_W2_ADDR_temp <= BRAM_W2_ADDR_temp + 1;
       else if(state == L2_WRITE_TEMP && n_state == L2_RD_BRTCH1) BRAM_W2_ADDR_temp <= 50;
     end
@@ -371,28 +378,32 @@ module cnn(clk,
   always @(posedge clk or posedge rst) begin
     if(rst) BRAM_W3_ADDR_temp <= 0;
     else begin
-      if(state == L3_RD_BRTCH1 || (state == L3_RD_BRTCH2 && counter <= 23) || (state == L3_RD_BRTCH3 && counter <= 49)) BRAM_W3_ADDR_temp <= BRAM_W3_ADDR_temp + 1;
+      if(state == IDLE) BRAM_W3_ADDR_temp <= 0;
+      else if(state == L3_RD_BRTCH1 || (state == L3_RD_BRTCH2 && counter <= 23) || (state == L3_RD_BRTCH3 && counter <= 49)) BRAM_W3_ADDR_temp <= BRAM_W3_ADDR_temp + 1;
     end
   end
 
   always @(posedge clk or posedge rst) begin
     if(rst) BRAM_W4_ADDR_temp <= 0;
     else begin
-      if(state == L4_RD_BRTCH1 && counter <= 29) BRAM_W4_ADDR_temp <= BRAM_W4_ADDR_temp + 1;
+      if(state == IDLE) BRAM_W4_ADDR_temp <= 0;
+      else if(state == L4_RD_BRTCH1 && counter <= 29) BRAM_W4_ADDR_temp <= BRAM_W4_ADDR_temp + 1;
     end
   end
 
   always @(posedge clk or posedge rst) begin
     if(rst) BRAM_W5_ADDR_temp <= 0;
     else begin
-      if((state == L5_RD_BRTCH1 || state == L5_RD_BRTCH2) && counter <= 20) BRAM_W5_ADDR_temp <= BRAM_W5_ADDR_temp + 1;
+      if(state == IDLE) BRAM_W5_ADDR_temp <= 0;
+      else if((state == L5_RD_BRTCH1 || state == L5_RD_BRTCH2) && counter <= 20) BRAM_W5_ADDR_temp <= BRAM_W5_ADDR_temp + 1;
     end
   end  
 
   always @(posedge clk or posedge rst) begin
     if(rst) L2_BRAM_IF1_ADDR_temp <= 0;
     else begin
-      if(state == L2_WRITE_TEMP) begin
+      if(state == IDLE) L2_BRAM_IF1_ADDR_temp <= 0;
+      else if(state == L2_WRITE_TEMP) begin
         if(counter == 0) L2_BRAM_IF1_ADDR_temp <= L2_BRAM_IF1_ADDR_temp + 1;
         else begin
           if(psum_temp_indx == 0) L2_BRAM_IF1_ADDR_temp <= 2;
@@ -436,7 +447,7 @@ module cnn(clk,
     if(rst) cnt_rd_new <= 0; // for conv1: RD24, for conv2: RD12
     else begin
       if((state == L1_READ24 && counter == 1) || (state == L2_READ12 && counter == 1)) cnt_rd_new <= cnt_rd_new + 1;
-      else if(state == L1_RD_BRTCH3 || state == L2_RD_BRTCH1 || state == L2_RD_BRTCH3) cnt_rd_new <= 0;
+      else if(state == L1_RD_BRTCH3 || state == L2_RD_BRTCH1 || state == L2_RD_BRTCH3 || state == IDLE) cnt_rd_new <= 0;
     end
   end
 
@@ -467,7 +478,7 @@ module cnn(clk,
     if(rst) channel_cnt <= 0;
     else begin
       if((state == L2_EXE && n_state == L2_RD_BRTCH1) || (state == L3_EXE && n_state == L3_RD_BRTCH1)) channel_cnt <= channel_cnt + 1;
-      else if((state == L2_WRITE_TEMP && n_state == L2_RD_BRTCH1) || state == L3_RST) channel_cnt <= 0;
+      else if((state == L2_WRITE_TEMP && n_state == L2_RD_BRTCH1) || state == L3_RST || state == IDLE) channel_cnt <= 0;
     end
   end
   // ============================================== counter end =====================================================================================================
@@ -543,7 +554,7 @@ module cnn(clk,
         else if(counter == 1 || counter == 3 || counter == 5 || counter == 7 || counter == 9  || counter == 11) icache_indx <= icache_indx + 1;
         else if(counter == 2 || counter == 4 || counter == 6 || counter == 8 || counter == 10 || counter == 12) icache_indx <= icache_indx + 7;
       end
-      else if(state == L1_WRITE_TEMP || state == L2_RST || ((n_state == L2_RD_BRTCH1 || n_state == L2_RD_BRTCH3) && (state == L2_EXE || state == L2_WRITE_TEMP))) icache_indx <= 0;
+      else if(state == IDLE || state == L1_WRITE_TEMP || state == L2_RST || ((n_state == L2_RD_BRTCH1 || n_state == L2_RD_BRTCH3) && (state == L2_EXE || state == L2_WRITE_TEMP))) icache_indx <= 0;
     end
   end
 
@@ -556,7 +567,7 @@ module cnn(clk,
         {w_cache[wcache_indx], w_cache[wcache_indx+1], w_cache[wcache_indx+2], w_cache[wcache_indx+3]} <= BRAM_W2_DOUT; 
       else if((state == L3_RD_BRTCH1 && counter != 0) || state == L3_RD_BRTCH2 || (state == L3_RD_BRTCH3 && counter != 0)) 
         {w_cache[wcache_indx], w_cache[wcache_indx+1], w_cache[wcache_indx+2], w_cache[wcache_indx+3]} <= BRAM_W3_DOUT;
-      else if(state == L4_RST || state == L5_RST) for(i = 0; i < 200; i=i+1) w_cache[i] <= 0;
+      else if(state == IDLE || state == L4_RST || state == L5_RST) for(i = 0; i < 200; i=i+1) w_cache[i] <= 0;
       else if(state == L4_RD_BRTCH1 && counter != 0) {w_cache[wcache_indx], w_cache[wcache_indx+1], w_cache[wcache_indx+2], w_cache[wcache_indx+3]} <= BRAM_W4_DOUT; 
       else if((state == L5_RD_BRTCH1 || state == L5_RD_BRTCH2) && counter != 0) {w_cache[wcache_indx], w_cache[wcache_indx+1], w_cache[wcache_indx+2], w_cache[wcache_indx+3]} <= BRAM_W5_DOUT; 
     end
@@ -643,7 +654,7 @@ module cnn(clk,
   always @(posedge clk or posedge rst) begin
     if(rst) for(i = 0; i < 8; i=i+1) psum_in[i] <= 0;
     else begin 
-      if(layer == 1 || layer == 4 || layer == 5 || state == L3_RST) for(i = 0; i < 8; i=i+1) psum_in[i] <= 0;
+      if(state == IDLE || layer == 1 || layer == 4 || layer == 5 || state == L3_RST) for(i = 0; i < 8; i=i+1) psum_in[i] <= 0;
       else if(state == L2_READ_TILE2 || state == L2_READ_TILE5 || state == L2_READ_TILE6 || (state == L2_EXE && counter == 0)) for(i = 0; i < 8; i=i+1) psum_in[i] <= psum_temp[i][psum_in_indx];
       else if(state == L3_EXE && counter == 0 && channel_cnt != 0) for(i = 0; i < 8; i=i+1) psum_in[i] <= psum_temp[i][psum_in_indx];
     end
@@ -655,7 +666,8 @@ module cnn(clk,
   always @(posedge clk or posedge rst) begin
     if(rst) psum_in_indx <= 0;
     else begin
-      if(state == L2_READ_TILE2 || state == L2_READ_TILE5 || state == L2_READ_TILE6 || (state == L2_EXE && counter == 0)) begin // delay 1 cycle
+      if(state == IDLE) psum_in_indx <= 0;
+      else if(state == L2_READ_TILE2 || state == L2_READ_TILE5 || state == L2_READ_TILE6 || (state == L2_EXE && counter == 0)) begin // delay 1 cycle
         if(psum_in_indx == 99) psum_in_indx <= 0;
         else psum_in_indx <= psum_in_indx + 1;
       end
@@ -674,7 +686,7 @@ module cnn(clk,
         if(psum_temp_indx == 99) psum_temp_indx <= 0;
         else psum_temp_indx <= psum_temp_indx + 1;
       end
-      else if(state == L3_RST || state == L5_RST) psum_temp_indx <= 0;
+      else if(state == IDLE || state == L3_RST || state == L5_RST) psum_temp_indx <= 0;
       else if(counter == 0 && ((state == L3_RD_BRTCH1 && channel_cnt != 0) || state == L3_RD_BRTCH3)) begin
         if(psum_temp_indx == 14) psum_temp_indx <= 0;
         else psum_temp_indx <= psum_temp_indx + 1;
@@ -693,7 +705,7 @@ module cnn(clk,
       end
     end
     else begin
-      if(state == L3_RST) begin
+      if(state == L3_RST || state == IDLE) begin
         for(i = 0; i < 8; i=i+1) begin
           for(j = 0; j < 100; j=j+1)
             psum_temp[i][j] <= 0;
@@ -758,7 +770,8 @@ module cnn(clk,
   always @(posedge clk or posedge rst) begin
     if(rst) soft_max_temp <= 0;
     else begin
-      if(state == L5_OUT) begin
+      if(state == IDLE) soft_max_temp <= 0;
+      else if(state == L5_OUT) begin
         if(psum_temp_indx == 26) soft_max_temp <= (soft_max_temp > pe_out_sum_a_relu) ? soft_max_temp : pe_out_sum_a_relu;
         else soft_max_temp <= (soft_max_temp > pe_out_sum_a_relu) ? ((soft_max_temp > pe_out_sum_b_relu) ? soft_max_temp : pe_out_sum_b_relu)
                                                                   : ((pe_out_sum_a_relu > pe_out_sum_b_relu) ? pe_out_sum_a_relu : pe_out_sum_b_relu);
