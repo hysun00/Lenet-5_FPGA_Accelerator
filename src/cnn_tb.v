@@ -153,6 +153,7 @@ module cnn_tb;
     #(`CYCLE*2)
     $display("\n======== Check start ================\n");
     err = 0;
+    `ifdef number
     for (i = 0; i < 10; i=i+1) begin
       if(cnn.psum_temp[1][i] !== GOLDEN[i])begin
         $display("DM[%4d] = %h, expect = %h", i, cnn.psum_temp[1][i], GOLDEN[i]);
@@ -162,7 +163,17 @@ module cnn_tb;
         $display("DM[%4d] = %h, pass", i, cnn.psum_temp[1][i]);
       end
     end  
-
+    `elsif letter
+    for (i = 0; i < 27; i=i+1) begin
+      if(cnn.psum_temp[1][i] !== GOLDEN[i])begin
+        $display("DM[%4d] = %h, expect = %h", i, cnn.psum_temp[1][i], GOLDEN[i]);
+        err = err + 1;
+      end
+      else begin
+        $display("DM[%4d] = %h, pass", i, cnn.psum_temp[1][i]);
+      end
+    end 
+    `endif 
     if (err === 0) begin
         $display("\n");
         $display("\n");
@@ -192,51 +203,6 @@ module cnn_tb;
 
     //=====================================================================================
 
-    #20 start = 1;
-    #10 start = 0;
-    wait(done);
-    $display("\n============ Done ===================\n");
-    $timeformat(-9, 2, " ns", 10); 
-    $display("\nSimulation time = %t\n",$time);
-    #(`CYCLE*2)
-    $display("\n======== Check start ================\n");
-    err = 0;
-    for (i = 0; i < 27; i=i+1) begin
-      if(cnn.psum_temp[1][i] !== GOLDEN[i])begin
-        $display("DM[%4d] = %h, expect = %h", i, cnn.psum_temp[1][i], GOLDEN[i]);
-        err = err + 1;
-      end
-      else begin
-        $display("DM[%4d] = %h, pass", i, cnn.psum_temp[1][i]);
-      end
-    end
-
-    if (err === 0) begin
-        $display("\n");
-        $display("\n");
-        $display("        ****************************               ");
-        $display("        **                        **       |\__||  ");
-        $display("        **  Congratulations !!    **      / ^.^  | ");
-        $display("        **                        **    /_____   | ");
-        $display("        **  Simulation PASS!!     **   /^ ^ ^ \\  |");
-        $display("        **                        **  |^ ^ ^ ^ |w| ");
-        $display("        ****************************   \\m___m__|_|");
-        $display("\n");
-    end
-    else begin
-      $display("\n");
-      $display("\n");
-      $display("        ****************************               ");
-      $display("        **                        **       |\__||  ");
-      $display("        **  OOPS!!                **      / X,X  | ");
-      $display("        **                        **    /_____   | ");
-      $display("        **  Simulation Failed!!   **   /^ ^ ^ \\  |");
-      $display("        **                        **  |^ ^ ^ ^ |w| ");
-      $display("        ****************************   \\m___m__|_|");
-      $display("         Totally has %d errors                     ", err); 
-      $display("\n");
-    end
-    $display("\nInference result = %d\n", result);
 
     $finish;
   end
@@ -244,6 +210,7 @@ module cnn_tb;
   always #(`CYCLE/2) clk = ~clk;
 
   initial begin
+    `ifdef number
     mode = 1;
     $readmemh("../weight/number/number_conv1_32.hex", bram_w1.mem);
     $readmemh("../weight/number/number_conv2_32.hex", bram_w2.mem);
@@ -253,16 +220,17 @@ module cnn_tb;
     $readmemh("../weight/number/number_conv1_32_in.hex", bram_if1.mem);
     //$readmemh("../weight/number/number_conv1_32_out.hex", GOLDEN, 0);
     $readmemh("../weight/number/number_fc2_out.hex", GOLDEN, 0);
-    wait(done);
+    `elsif letter
     mode = 0;
     $readmemh("../weight/letter/letter_conv1_32.hex", bram_w1.mem);
     $readmemh("../weight/letter/letter_conv2_32.hex", bram_w2.mem);
     $readmemh("../weight/letter/letter_conv3_32.hex", bram_w3.mem);
     $readmemh("../weight/letter/letter_fc1_32.hex",   bram_w4.mem);
     $readmemh("../weight/letter/letter_fc2_32.hex",   bram_w5.mem);      
+    //$readmemh("../Data_processing/testdata/ltest_9.hex", bram_if1.mem);
     $readmemh("../weight/letter/letter_conv1_32_in.hex", bram_if1.mem);
-    //$readmemh("../weight/letter/letter_358_in_32.hex", bram_if1.mem);
     $readmemh("../weight/letter/letter_fc2_out.hex", GOLDEN, 0);
+    `endif 
   end
 	
   initial begin

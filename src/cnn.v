@@ -1,6 +1,6 @@
 `define DATA_BITS 32
 `define INTERNAL_BITS 8
-`include "PE.v"
+`include "PE_new.v"
 module cnn(clk, 
            rst, 
            start, 
@@ -418,6 +418,7 @@ module cnn(clk,
   assign done = (state == DONE);
   assign relu_en = (layer == 1 || (layer == 2 && channel_cnt == 5) || (layer == 3 && channel_cnt == 15 && !(counter == 0 && state == L3_RD_BRTCH1))) ? 1 : 0;
   assign quan_en = (layer == 1 || (layer == 2 && channel_cnt == 5) || (layer == 3 && channel_cnt == 15 && !(counter == 0 && state == L3_RD_BRTCH1))) ? 1 : 0;
+  assign msb_ctrl = (!mode && layer == 5) ? 1 : 0;
 
   assign BRAM_W1_EN  = 1;
   assign BRAM_W2_EN  = 1;
@@ -752,7 +753,10 @@ module cnn(clk,
   assign pe_out_sum_a_relu = (pe_out_sum_a < 0) ? 0 : pe_out_sum_a;
   assign pe_out_sum_b_relu = (pe_out_sum_b < 0) ? 0 : pe_out_sum_b;
 
-  assign pe_out_sum_a_quan = (|pe_out_sum_a_relu[31:15]) ? 255 : ((&pe_out_sum_a_relu[14:7]) ? pe_out_sum_a_relu[14:7] : (pe_out_sum_a_relu[14:7] + pe_out_sum_a_relu[6])); 
+  assign pe_out_sum_a_quan = (mode) ? ((|pe_out_sum_a_relu[31:15]) ? 255 : ((&pe_out_sum_a_relu[14:7]) ? pe_out_sum_a_relu[14:7] : (pe_out_sum_a_relu[14:7] + pe_out_sum_a_relu[6]))) :
+                                      ((pe_out_sum_a[31]) ? ((pe_out_sum_a[14:7] == 8'b10000000) ? 8'b10000000 : ((&pe_out_sum_a[30:14]) ? (pe_out_sum_a[14:7] + pe_out_sum_a[6]) : 8'b10000000)) : 
+                                                            ((pe_out_sum_a[14:7] == 8'b01111111) ? 8'b01111111 : ((|pe_out_sum_a[30:14]) ? 8'b01111111 : (pe_out_sum_a[14:7] + pe_out_sum_a[6]))));
+  // assign pe_out_sum_a_quan = ((|pe_out_sum_a_relu[31:15]) ? 255 : ((&pe_out_sum_a_relu[14:7]) ? pe_out_sum_a_relu[14:7] : (pe_out_sum_a_relu[14:7] + pe_out_sum_a_relu[6])));                     
   // ===================================================================================================================================================================
   
   // ===================================================== softmax ====================================================================================
@@ -939,6 +943,7 @@ module cnn(clk,
                   .in_W25(w_cache[a*25+24]),
                   .rst(rst), 
                   .clk(clk),
+                  .msb_ctrl(msb_ctrl),
                   .psum(psum_in[a]),
                   .relu_en(relu_en),
                   .quan_en(quan_en),
