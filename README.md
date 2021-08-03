@@ -1,11 +1,17 @@
-# FPGA-Based Neural Network Acceleration for Handwritten Digits & Alphabets Recognition 
+FPGA-Based Neural Network Acceleration for Handwritten Digits & Alphabets Recognition 
+=========================
+This repository is about our undergraduate graduation project from NCKUEE, implementing LeNet-5 by using Vivado and PYNQ-Z2
 
-## This is the graduation project from NCKU EE
-* **Auther:** 
-    - `Jack` from NCKUEE
-    - `Charley` from NCKUES
-* **Tools:**  `PYNQ-Z2`, `Vivado`, `Jupyter notebook`
-* **Programming language:**  `Verilog`, `Python`
+## Contributer:
+* `Jack` from NCKUEE
+* `Charley` from NCKUES
+## Tools:
+* `PYNQ-Z2`
+* `Vivado`
+* `Jupyter notebook`
+## Programming language:
+* `Verilog`
+* `Python`
 
 ## Lenet-5 Architecture
 <img src="/Image/Lenet-5_architecture.png"/>
@@ -20,23 +26,30 @@
 
 ## DLA Architecture
 
-## PYNQ-Z2 Utilization
+## PYNQ-Z2 board
+### Utilization
 |Resource                  |Utilization  |Avaliable    |Utilization % |
 |  -----                   | -----       | -----       | -----        |
-|LUT     	               |40856        |53200        |76.80         |
+|LUT     	           |40856        |53200        |76.80         |
 |LUTRAM                    |1923         |17400        |11.05         |
 |FF                        |43075        |106400       |40.48         |
-|BRAM   	               |112          |140          |80.00         |
-|DSP    		           |200          |220          |90.91         |
+|BRAM   	           |112          |140          |80.00         |
+|DSP                       |200          |220          |90.91         |
 |BUFG                      |2            |32           |6.25          |
 
 <img src="/Image/Utilization_graph.png" height="50%" width="50%"/>
 
-## PYNQ-Z2 Power
+### Power
 <img src="/Image/power.png"/>
 
 ## Performance
-
+### Accuracy:
+        Number recognition accuracy: 98.34 %
+        Letter recognition accuracy: 93.14 %
+> From DLA_Accuracy_test.ipynb
+### FPS:
+        Clock rate: 75 MHz
+        FPS: 805.64
 ## References:
 * [1] https://github.com/ChrisZonghaoLi/Rudi_CNN_Conv_Accelerator
 * [2] https://github.com/eecheng87/Convolution
