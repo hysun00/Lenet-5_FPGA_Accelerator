@@ -1,4 +1,4 @@
-## Kernel arrangement methodology
+## Kernel data arrangement methodology
 
 |Parameter |Description  |
 |  -----   | -----       |

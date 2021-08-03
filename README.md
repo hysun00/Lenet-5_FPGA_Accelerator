@@ -2,7 +2,7 @@ FPGA-Based Neural Network Acceleration for Handwritten Digits & Alphabets Recogn
 =========================
 This repository is about our undergraduate graduation project from NCKUEE, implementing LeNet-5 by using Vivado and PYNQ-Z2
 
-## Contributer:
+## Contributors:
 * `Jack` from NCKUEE
 * `Charley` from NCKUES
 ## Tools:
