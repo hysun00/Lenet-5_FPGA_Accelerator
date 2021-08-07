@@ -13,6 +13,17 @@ This repository is about our undergraduate graduation project from NCKUEE, imple
 * `Verilog`
 * `Python`
 
+## Demo:
+<img src="/Image/demo.gif"/>
+
+## Running:
+* In localhost:
+    - python3 main.py
+* In pynq terminal:
+    - sudo python3 server.py
+    
+> NOTE: You should execute server.py first or you will get connection error
+
 ## Lenet-5 Architecture
 <img src="/Image/Lenet-5_architecture.png"/>
 
@@ -25,15 +36,18 @@ This repository is about our undergraduate graduation project from NCKUEE, imple
 * Weight : 1 bits integer and 7 bits fraction
 
 ## DLA Architecture
+<img src="/Image/DLA_architecture.png"/>
+<img src="/Image/PE_architecture.png"/>
+
 
 ## PYNQ-Z2 board
 ### Utilization
 |Resource                  |Utilization  |Avaliable    |Utilization % |
 |  -----                   | -----       | -----       | -----        |
-|LUT     	           |40856        |53200        |76.80         |
-|LUTRAM                    |1923         |17400        |11.05         |
-|FF                        |43075        |106400       |40.48         |
-|BRAM   	           |112          |140          |80.00         |
+|LUT     	           |37972        |53200        |71.38         |
+|LUTRAM                    |1883         |17400        |10.82         |
+|FF                        |42834        |106400       |40.26         |
+|BRAM   	           |30           |140          |21.43         |
 |DSP                       |200          |220          |90.91         |
 |BUFG                      |2            |32           |6.25          |
 
@@ -48,8 +62,11 @@ This repository is about our undergraduate graduation project from NCKUEE, imple
         Letter recognition accuracy: 93.14 %
 > From DLA_Accuracy_test.ipynb
 ### FPS:
-        Clock rate: 75 MHz
+        Clock rate: 70 MHz
         FPS: 805.64
+
+## 
+
 ## References:
 * [1] https://github.com/ChrisZonghaoLi/Rudi_CNN_Conv_Accelerator
 * [2] https://github.com/eecheng87/Convolution
