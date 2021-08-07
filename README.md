@@ -18,10 +18,14 @@ This repository is about our undergraduate graduation project from NCKUEE, imple
 
 ## Running:
 * In localhost:
-    - python3 main.py
+```
+    python3 main.py
+```
 * In pynq terminal:
-    - sudo python3 server.py
-    
+```
+    sudo python3 server.py
+```
+
 > NOTE: You should execute server.py first or you will get connection error
 
 ## Lenet-5 Architecture
