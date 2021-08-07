@@ -9,9 +9,9 @@ import os
 SEPARATOR = "<SEPARATOR>"
 BUFFER_SIZE = 1024 * 4 #4KB
 
-def save():
-    filename = "image.jpg"
-    image1.save(filename)
+# def save():
+#     filename = "image.jpg"
+#     image1.save(filename)
 
 def activate_paint(e):
     global lastx, lasty
@@ -31,7 +31,9 @@ def clear():
 def exitt():
     exit()
 
-def upload():
+def start():
+    filename = "image.jpg"
+    image1.save(filename)
     # get the file size
     filename = "image.jpg"
     host = "192.168.1.103" # Befor executing, you should check your pynq ip by typing "ifconfig" on pynq terminal, and copy the "eth0: inet 192.168.1.X"
@@ -69,7 +71,7 @@ def upload():
 
 win = Tk()
 win.title("Hand-written recognition system")
-win.iconbitmap('paint.ico') # Delete this line if you don't have file "Paint.ico" in this folder
+win.iconbitmap('./Image/paint.ico') # Delete this line if you don't have file "Paint.ico" in this folder
 lastx, lasty = None, None
 
 cv = Canvas(win, width=250, height=250, bg='white')
@@ -79,11 +81,14 @@ draw = ImageDraw.Draw(image1)
 cv.bind('<1>', activate_paint)
 cv.pack(expand=YES, fill=BOTH)
 
-save_ = Button(text="Save", command=save)
-save_.pack()
+# save_ = Button(text="Save", command=save)
+# save_.pack()
 
-upload=Button(text='Upload',command=upload)
-upload.pack()
+# upload=Button(text='Upload',command=upload)
+# upload.pack()
+
+start = Button(text="Start", command=start)
+start.place(relx=.5, rely=.955, anchor="center")
 
 reset=Button(text='Reset',command=clear)
 reset.pack(side=LEFT)
