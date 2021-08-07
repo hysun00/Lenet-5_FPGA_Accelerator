@@ -26,7 +26,7 @@ This repository is about our undergraduate graduation project from NCKUEE, imple
     sudo python3 server.py
 ```
 
-> NOTE: You should execute server.py first or you will get connection error
+> NOTE: You should execute server.py first or you will get connection error and you should change path of Overlay to where you put your bitstream file
 
 ## Lenet-5 Architecture
 <img src="/Image/Lenet-5_architecture.png"/>
@@ -46,14 +46,14 @@ This repository is about our undergraduate graduation project from NCKUEE, imple
 
 ## PYNQ-Z2 board
 ### Utilization
-|Resource                  |Utilization  |Avaliable    |Utilization % |
-|  -----                   | -----       | -----       | -----        |
+|Resource              |Utilization  |Avaliable    |Utilization % |
+|  -----               | -----       | -----       | -----        |
 |LUT     	           |37972        |53200        |71.38         |
-|LUTRAM                    |1883         |17400        |10.82         |
-|FF                        |42834        |106400       |40.26         |
+|LUTRAM                |1883         |17400        |10.82         |
+|FF                    |42834        |106400       |40.26         |
 |BRAM   	           |30           |140          |21.43         |
-|DSP                       |200          |220          |90.91         |
-|BUFG                      |2            |32           |6.25          |
+|DSP                   |200          |220          |90.91         |
+|BUFG                  |2            |32           |6.25          |
 
 <img src="/Image/Utilization_graph.png" height="50%" width="50%"/>
 
