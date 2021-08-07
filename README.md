@@ -19,7 +19,7 @@ This repository is about our undergraduate graduation project from NCKUEE, imple
 ## Running:
 * In localhost:
 ```
-    python3 main.py
+    python main.py
 ```
 * In pynq terminal:
 ```
@@ -27,6 +27,11 @@ This repository is about our undergraduate graduation project from NCKUEE, imple
 ```
 
 > NOTE: You should execute server.py first or you will get connection error and you should change path of Overlay to where you put your bitstream file
+
+### Dependency:
+```
+    pip install -r requirements.txt
+``` 
 
 ## Lenet-5 Architecture
 <img src="/Image/Lenet-5_architecture.png"/>
