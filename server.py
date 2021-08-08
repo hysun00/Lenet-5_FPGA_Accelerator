@@ -1,17 +1,11 @@
-# # reciever
-"""
-Server receiver of the file
-"""
 import socket
 import tqdm
 import os
 import numpy as np
 import cv2
-
 import time
 from pynq import Overlay
 from pynq import MMIO
-
 
 def extract_data():
     time.sleep(3)
@@ -19,27 +13,24 @@ def extract_data():
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     list = []
     resize_img = cv2.resize(gray, (28,28))
-    dst = 255 - resize_img
-    # print(dst)
-    arr_2d = np.pad(array=dst, pad_width=((2,2),(2,2)), mode='constant', constant_values=0)
+    dst = 255 - resize_img  # black and white exchange 
+    arr_2d = np.pad(array=dst, pad_width=((2,2),(2,2)), mode='constant', constant_values=0) # zero padding
     arr_2d = np.reshape(arr_2d, (1024, 1)) 
     np.savetxt("./temp.hex", arr_2d, delimiter ="",fmt ='% s')
     with open("./temp.hex", "r") as f :
         for j in f:
             list.append(int(j))
-    l_i_hex1 = ['{:02x}'.format(l) for l in list]
-    arr_2d = np.reshape(l_i_hex1, (256,4))
+    l_i_hex1 = ['{:02x}'.format(l) for l in list] # turn the int into 8 bit hex number
+    arr_2d = np.reshape(l_i_hex1, (256,4)) # four data a row
     np.savetxt("./image.hex", arr_2d, delimiter ="",fmt ='% s')
     
 def pynq():
-    design = Overlay("../Ultimate_70M/cnn.bit")
+    design = Overlay("./cnn.bit") # change the path to where you put the Vivado/cnn.* file 
     cdma_address = design.ip_dict['axi_cdma_0']['phys_addr']
     axi_gpio_address0 = design.ip_dict['axi_gpio_0']['phys_addr'] # start
     axi_gpio_address1 = design.ip_dict['axi_gpio_1']['phys_addr'] # done
     axi_gpio_address2 = design.ip_dict['axi_gpio_2']['phys_addr'] # mode
     axi_gpio_address3 = design.ip_dict['axi_gpio_3']['phys_addr'] # result
-
-
 
     global zynq_sys
     global cdma
@@ -50,26 +41,22 @@ def pynq():
     
     zynq_sys = MMIO(zynq_addr,    0xC000)
     cdma     = MMIO(cdma_address, 0xC000)
-    gpio_a = MMIO(axi_gpio_address0,8)
-    gpio_b = MMIO(axi_gpio_address1,8)
-    gpio_c = MMIO(axi_gpio_address2,8)
-    gpio_d = MMIO(axi_gpio_address3,8)
+    gpio_a   = MMIO(axi_gpio_address0,8)
+    gpio_b   = MMIO(axi_gpio_address1,8)
+    gpio_c   = MMIO(axi_gpio_address2,8)
+    gpio_d   = MMIO(axi_gpio_address3,8)
+
+    # tri-state
     gpio_a.write(0x4,0)
     gpio_c.write(0x4,0)
 
     print('start initial!\n')
 
 
-    '''
-
-    initial conv1 weight to bram2
-
-
-    '''
+    # initial conv1 weight to bram2
     print('Weight1 initial!\n')
 
     bram2_offset = 0x0
-
     with open("number_conv1_32.hex", "r") as f_in:
         for line1 in f_in:
             if not line1:
@@ -82,16 +69,10 @@ def pynq():
     cdma.write(0x20,bram2_addr)
     cdma.write(0x28,0x98) # 152 = 38 * 4
 
-    '''
-
-    initial conv2 weight to bram3
-
-
-    '''
+    # initial conv2 weight to bram3
     print('Weight2 initial!\n')
 
     bram3_offset = 0x0
-
     with open("number_conv2_32.hex", "r") as f_in:
         for line1 in f_in:
             if not line1:
@@ -105,16 +86,10 @@ def pynq():
     cdma.write(0x28,0x960) # 2400 = 600 * 4
 
 
-    '''
-
-    initial conv3 weight to bram4
-
-
-    '''
+    # initial conv3 weight to bram4
     print('Weight3 initial!\n')
 
     bram4_offset = 0x0
-
     with open("number_conv3_32.hex", "r") as f_in:
         for line1 in f_in:
             if not line1:
@@ -127,16 +102,11 @@ def pynq():
     cdma.write(0x20,bram4_addr)
     cdma.write(0x28,0xBB80) # 48000 = 12000 * 4
 
-    '''
 
-    initial fc1 weight to bram5
-
-
-    '''
+    # initial fc1 weight to bram5
     print('Weight4 initial!\n')
 
     bram5_offset = 0x0
-
     with open("number_fc1_32.hex", "r") as f_in:
         for line1 in f_in:
             if not line1:
@@ -149,16 +119,10 @@ def pynq():
     cdma.write(0x20,bram5_addr)
     cdma.write(0x28,0x2760) # 10080 = 2520 * 4
 
-    '''
-
-    initial fc2 weight to bram6
-
-
-    '''
+    # initial fc2 weight to bram6
     print('Weight5 initial!\n')
 
     bram6_offset = 0x0
-
     with open("number_fc2_32.hex", "r") as f_in:
         for line1 in f_in:
             if not line1:
@@ -170,14 +134,14 @@ def pynq():
     cdma.write(0x18,zynq_addr)
     cdma.write(0x20,bram6_addr)
     cdma.write(0x28,0x348) # 840 = 210 * 4
-    
-
 
     print('initial finish!\n')
-def load_if():
+
+
+def load_if(): # load input feature map
     print('Input feature map initial!\n')
     bram0_offset = 0x0
-    time.sleep(2)
+    time.sleep(1)
     with open("image.hex", "r") as f_in:
         for line1 in f_in:
             if not line1:
@@ -191,12 +155,11 @@ def load_if():
     cdma.write(0x28,0x400) # 1024
     
 def main():
-
-    gpio_c.write(0,1) # write 1: number
+    gpio_c.write(0,1) # write 1 => mode = number
     start_time = time.time()
     gpio_a.write(0,1) # write 1 to start
     gpio_a.write(0,0)
-    print("--- %s seconds ---" % (time.time() - start_time))
+    print("-------------------------------------------------")
     time.sleep(1)
     print("Inference value: ", gpio_d.read())
     print('all finish!')
