@@ -5,3 +5,6 @@ data_processing/.ipynb_checkpoints
 Vivado/.ipynb_checkpoints
 src/a.out
 src/cnn.vcd
+train/gzip
+train/test
+train/trainn
