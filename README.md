@@ -45,7 +45,7 @@ This repository is about our undergraduate graduation project from NCKUEE, imple
 * Weight : 1 bits integer and 7 bits fraction
 
 ## DLA Architecture
-<img src="/Image/DLA_architecture.png"/>
+<img src="/Image/DLA_architecture.jpg"/>
 
 > **Two** feature BRAMs for **ifmp/ofmp** storage & **Five** weight BRAMs for **layer 1~5** weight storage.
 
@@ -85,11 +85,12 @@ This repository is about our undergraduate graduation project from NCKUEE, imple
 * [2] https://github.com/eecheng87/Convolution
 * [3] https://github.com/WeiCheng14159/MNIST_accelerator
 * [4] https://github.com/x4nth055/pythoncode-tutorials/tree/master/general/transfer-files
-* [5] NCKU Courses:
+* [5] https://github.com/syshen/mnist-cnn/blob/master/mnist-CNN.ipynb
+* [6] NCKU Courses:
     - AI-ON-CHIP FOR MACHINE LEARNING AND INFERENCE -- Lectured by Professor Chen Chung-Ho
     - DEEP LEARNING INTEGRATED CIRCUIT DESIGN AND ACCELERATION -- Lectured by Professor Lin Ing-Chao
-* [6] LeCun, Yann  (1998), "Gradient-Based Learning Applied to Document Recognition"
-* [7] Dai Rongshi  (2019), "Accelerator Implementation of Lenet-5 Convolution Neural Network Based on FPGA with HLS"
-* [8] Yu-Hsin Chen (2017), "Eyeriss: An Energy-Efficient Reconfigurable Accelerator for Deep Convolutional Neural Networks"
-* [9] Vivienne Sze, Yu-Hsin Chen, Tien-Ju Yang, Joel S. Emer (2017), "Efficient Processing of Deep Neural Networks: A Tutorial and Survey"
-* [10] David Gschwend (2016), "ZynqNet: An FPGA-Accelerated Embedded Convolutional Neural Network"
+* [7] LeCun, Yann  (1998), "Gradient-Based Learning Applied to Document Recognition"
+* [8] Dai Rongshi  (2019), "Accelerator Implementation of Lenet-5 Convolution Neural Network Based on FPGA with HLS"
+* [9] Yu-Hsin Chen (2017), "Eyeriss: An Energy-Efficient Reconfigurable Accelerator for Deep Convolutional Neural Networks"
+* [10] Vivienne Sze, Yu-Hsin Chen, Tien-Ju Yang, Joel S. Emer (2017), "Efficient Processing of Deep Neural Networks: A Tutorial and Survey"
+* [11] David Gschwend (2016), "ZynqNet: An FPGA-Accelerated Embedded Convolutional Neural Network"
