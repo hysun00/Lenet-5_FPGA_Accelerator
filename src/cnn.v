@@ -1,11 +1,11 @@
 `define DATA_BITS 32
 `define INTERNAL_BITS 8
-`include "PE_new.v"
+`include "PE.v"
 module cnn(clk, 
            rst, 
            start, 
-           done, 
-           mode, // mode = 1: number / mode = 0: letter
+           done,
+           ready,
            result,
            BRAM_IF1_ADDR,  // IF1: for [conv1/conv3 input] & [conv2 output]
            BRAM_IF2_ADDR,  // IF2: for [conv2 input]       & [conv1/conv3 output]
@@ -46,7 +46,7 @@ module cnn(clk,
   input clk;
   input rst;
   input start;
-  input mode; // mode = 1: number / mode = 0: letter
+  input ready;
   input  [`DATA_BITS-1:0] BRAM_IF1_DOUT, BRAM_W1_DOUT, BRAM_IF2_DOUT, BRAM_W2_DOUT, BRAM_W3_DOUT, BRAM_W4_DOUT, BRAM_W5_DOUT; // data out
   
   output done;
@@ -235,8 +235,8 @@ module cnn(clk,
       L5_RD_BRTCH2:  n_state = (counter == 21) ? L5_EXE : L5_RD_BRTCH2;
       L5_EXE:        n_state = (counter == 1)  ? L5_SUM : L5_EXE;
       L5_SUM:        n_state = L5_OUT;
-      L5_OUT:        n_state = (mode) ? ((psum_temp_indx == 8) ? DONE : L5_RD_BRTCH1) : ((psum_temp_indx == 26) ? DONE : L5_RD_BRTCH1); // mode = 1: number, mode = 0: letter
-      DONE:          n_state = IDLE;
+      L5_OUT:        n_state = (psum_temp_indx == 46) ? DONE : L5_RD_BRTCH1; // mode = 1: number, mode = 0: letter
+      DONE:          n_state = (ready) ? IDLE : DONE;
 
       default:       n_state = IDLE;
     endcase
@@ -418,7 +418,6 @@ module cnn(clk,
   assign done = (state == DONE);
   assign relu_en = (layer == 1 || (layer == 2 && channel_cnt == 5) || (layer == 3 && channel_cnt == 15 && !(counter == 0 && state == L3_RD_BRTCH1))) ? 1 : 0;
   assign quan_en = (layer == 1 || (layer == 2 && channel_cnt == 5) || (layer == 3 && channel_cnt == 15 && !(counter == 0 && state == L3_RD_BRTCH1))) ? 1 : 0;
-  assign msb_ctrl = (!mode && layer == 5) ? 1 : 0;
 
   assign BRAM_W1_EN  = 1;
   assign BRAM_W2_EN  = 1;
@@ -753,10 +752,10 @@ module cnn(clk,
   assign pe_out_sum_a_relu = (pe_out_sum_a < 0) ? 0 : pe_out_sum_a;
   assign pe_out_sum_b_relu = (pe_out_sum_b < 0) ? 0 : pe_out_sum_b;
 
-  assign pe_out_sum_a_quan = (mode) ? ((|pe_out_sum_a_relu[31:15]) ? 255 : ((&pe_out_sum_a_relu[14:7]) ? pe_out_sum_a_relu[14:7] : (pe_out_sum_a_relu[14:7] + pe_out_sum_a_relu[6]))) :
-                                      ((pe_out_sum_a[31]) ? ((pe_out_sum_a[14:7] == 8'b10000000) ? 8'b10000000 : ((&pe_out_sum_a[30:14]) ? (pe_out_sum_a[14:7] + pe_out_sum_a[6]) : 8'b10000000)) : 
-                                                            ((pe_out_sum_a[14:7] == 8'b01111111) ? 8'b01111111 : ((|pe_out_sum_a[30:14]) ? 8'b01111111 : (pe_out_sum_a[14:7] + pe_out_sum_a[6]))));
-  // assign pe_out_sum_a_quan = ((|pe_out_sum_a_relu[31:15]) ? 255 : ((&pe_out_sum_a_relu[14:7]) ? pe_out_sum_a_relu[14:7] : (pe_out_sum_a_relu[14:7] + pe_out_sum_a_relu[6])));                     
+  // assign pe_out_sum_a_quan = (mode) ? ((|pe_out_sum_a_relu[31:15]) ? 255 : ((&pe_out_sum_a_relu[14:7]) ? pe_out_sum_a_relu[14:7] : (pe_out_sum_a_relu[14:7] + pe_out_sum_a_relu[6]))) :
+  //                                     ((pe_out_sum_a[31]) ? ((pe_out_sum_a[14:7] == 8'b10000000) ? 8'b10000000 : ((&pe_out_sum_a[30:14]) ? (pe_out_sum_a[14:7] + pe_out_sum_a[6]) : 8'b10000000)) : 
+  //                                                           ((pe_out_sum_a[14:7] == 8'b01111111) ? 8'b01111111 : ((|pe_out_sum_a[30:14]) ? 8'b01111111 : (pe_out_sum_a[14:7] + pe_out_sum_a[6]))));
+  assign pe_out_sum_a_quan = ((|pe_out_sum_a_relu[31:15]) ? 255 : ((&pe_out_sum_a_relu[14:7]) ? pe_out_sum_a_relu[14:7] : (pe_out_sum_a_relu[14:7] + pe_out_sum_a_relu[6])));                     
   // ===================================================================================================================================================================
   
   // ===================================================== softmax ====================================================================================
@@ -764,7 +763,7 @@ module cnn(clk,
     if(rst) soft_max_indx <= 0;
     else begin
       if(state == L5_OUT) begin
-        if(psum_temp_indx == 26) soft_max_indx <= (soft_max_temp > pe_out_sum_a_relu) ? soft_max_indx : psum_temp_indx;
+        if(psum_temp_indx == 46) soft_max_indx <= (soft_max_temp > pe_out_sum_a_relu) ? soft_max_indx : psum_temp_indx;
         else soft_max_indx <= (soft_max_temp > pe_out_sum_a_relu) ? ((soft_max_temp > pe_out_sum_b_relu) ? soft_max_indx : psum_temp_indx + 1)
                                                                   : ((pe_out_sum_a_relu > pe_out_sum_b_relu) ? psum_temp_indx : psum_temp_indx + 1);
       end
@@ -776,7 +775,7 @@ module cnn(clk,
     else begin
       if(state == IDLE) soft_max_temp <= 0;
       else if(state == L5_OUT) begin
-        if(psum_temp_indx == 26) soft_max_temp <= (soft_max_temp > pe_out_sum_a_relu) ? soft_max_temp : pe_out_sum_a_relu;
+        if(psum_temp_indx == 46) soft_max_temp <= (soft_max_temp > pe_out_sum_a_relu) ? soft_max_temp : pe_out_sum_a_relu;
         else soft_max_temp <= (soft_max_temp > pe_out_sum_a_relu) ? ((soft_max_temp > pe_out_sum_b_relu) ? soft_max_temp : pe_out_sum_b_relu)
                                                                   : ((pe_out_sum_a_relu > pe_out_sum_b_relu) ? pe_out_sum_a_relu : pe_out_sum_b_relu);
       end
@@ -943,7 +942,6 @@ module cnn(clk,
                   .in_W25(w_cache[a*25+24]),
                   .rst(rst), 
                   .clk(clk),
-                  .msb_ctrl(msb_ctrl),
                   .psum(psum_in[a]),
                   .relu_en(relu_en),
                   .quan_en(quan_en),
