@@ -116,6 +116,8 @@ module PE(rst,
  
   integer i;
   wire [31:0] relu_out;
+  reg signed [31:0] sum1;
+  reg signed [31:0] sum2;
   reg signed [31:0] sum;
   reg [31:0] mul [0:24]; // 25 * 32 = 800
 
@@ -153,16 +155,26 @@ module PE(rst,
 
   // 加法器
   always @(posedge clk or posedge rst) begin
-    if(rst) sum <= 0;
+    if(rst) begin
+      sum1 <= 0;
+      sum2 <= 0;
+    end 
     else begin
-      sum <= (((mul[1]  + mul[2])  + (mul[3]  + mul[4]) ) +
-              ((mul[5]  + mul[6])  + (mul[7]  + mul[8]) ) +
-              ((mul[9]  + mul[10]) + (mul[11] + mul[12])) +
-              ((mul[13] + mul[14]) + (mul[15] + mul[16])) +
-              ((mul[17] + mul[18]) + (mul[19] + mul[20])) +
-              ((mul[21] + mul[22]) + (mul[23] + mul[24])) +
-               (mul[0]  + psum));
+      sum1 <= mul[1]  + mul[2]  + mul[3]  + mul[4]  +
+              mul[5]  + mul[6]  + mul[7]  + mul[8]  +
+              mul[9]  + mul[10] + mul[11] + mul[12] +
+              mul[13];
+              
+      sum2 <= mul[14] + mul[15] + mul[16] + mul[17] +
+              mul[18] + mul[19] + mul[20] + mul[21] +
+              mul[22] + mul[23] + mul[24] + mul[0]  + 
+              psum;
     end
+  end
+  
+  always @(posedge clk or posedge rst) begin
+    if(rst) sum <= 0;
+    else sum <= sum1 + sum2;
   end
 
   assign relu_out = (relu_en) ? ((sum < 0) ? 0 : sum) : sum;

@@ -1,6 +1,8 @@
 `define DATA_BITS 32
 `define INTERNAL_BITS 8
 `include "PE.v"
+// pipeline X: remain the same
+// pipeline O: modify
 module cnn(clk, 
            rst, 
            start, 
@@ -194,8 +196,8 @@ module cnn(clk,
       L1_READ_TILE6: n_state = L1_EXE1;
       L1_READ_TILE7: n_state = L1_READ_TILE8; 
       L1_READ_TILE8: n_state = L1_EXE2;
-      L1_EXE1:       n_state = (counter == 2) ? L1_MX_PL1 : L1_EXE1;
-      L1_EXE2:       n_state = (counter == 2) ? L1_MX_PL2 : L1_EXE2;
+      L1_EXE1:       n_state = (counter == 3) ? L1_MX_PL1 : L1_EXE1;
+      L1_EXE2:       n_state = (counter == 3) ? L1_MX_PL2 : L1_EXE2;
       L1_MX_PL1:     n_state = (counter == 5) ? L1_READ_TILE3 : L1_MX_PL1;  // repeat 6 times -> L1_RD_BRTCH1
       L1_MX_PL2:     n_state = (counter == 5) ? L1_WRITE_TEMP : L1_MX_PL2;
       L1_WRITE_TEMP: n_state = (BRAM_IF2_ADDR_temp == 293) ? L2_RST : ((counter == 2) ? ((cnt_rd_new == 6) ? L1_RD_BRTCH3 : L1_READ24) : L1_WRITE_TEMP); // 6 * 2 = 4 * 3
@@ -210,22 +212,22 @@ module cnn(clk,
       L2_READ_TILE2: n_state = L2_READ_TILE5;
       L2_READ_TILE5: n_state = L2_READ_TILE6;
       L2_READ_TILE6: n_state = L2_EXE;
-      L2_EXE:        n_state = (counter == 2) ? ((channel_cnt == 5) ? L2_MX_PL : ((psum_temp_indx == 99) ? L2_RD_BRTCH1 : ((cnt_rd_new == 4) ? L2_RD_BRTCH3 : L2_READ12))) : L2_EXE; // rd12 repeats 4 times
+      L2_EXE:        n_state = (counter == 3) ? ((channel_cnt == 5) ? L2_MX_PL : ((psum_temp_indx == 99) ? L2_RD_BRTCH1 : ((cnt_rd_new == 4) ? L2_RD_BRTCH3 : L2_READ12))) : L2_EXE; // rd12 repeats 4 times
       L2_MX_PL:      n_state = (counter == 7) ? L2_WRITE_TEMP : L2_MX_PL;
       L2_WRITE_TEMP: n_state = (L2_BRAM_IF1_ADDR_temp == 99) ? L3_RST : ((counter == 1) ? ((psum_temp_indx == 0) ? L2_RD_BRTCH1 : ((cnt_rd_new == 4) ? L2_RD_BRTCH3 : L2_READ12)) : L2_WRITE_TEMP); // 8 = 4 * 2 // change condition
 
       //======================= Layer 3 ===========================================================================================================
       L3_RST:        n_state = L3_RD_BRTCH1;
-      L3_RD_BRTCH1:  n_state = (counter == 25) ? L3_RD_BRTCH2  : L3_RD_BRTCH1;
-      L3_RD_BRTCH2:  n_state = (counter == 24) ? L3_EXE : L3_RD_BRTCH2;
-      L3_RD_BRTCH3:  n_state = (counter == 50) ? L3_EXE : L3_RD_BRTCH3;
-      L3_EXE:        n_state = (counter == 1)  ? ((psum_temp_indx == 14) ? ((channel_cnt == 15) ? L3_DONE : L3_RD_BRTCH1) : L3_RD_BRTCH3) : L3_EXE;
+      L3_RD_BRTCH1:  n_state = (counter == 25) ? L3_RD_BRTCH2  : L3_RD_BRTCH1; // weight + input
+      L3_RD_BRTCH2:  n_state = (counter == 24) ? L3_EXE : L3_RD_BRTCH2; // weight 
+      L3_RD_BRTCH3:  n_state = (counter == 50) ? L3_EXE : L3_RD_BRTCH3; // weight 
+      L3_EXE:        n_state = (counter == 2)  ? ((psum_temp_indx == 14) ? ((channel_cnt == 15) ? L3_DONE : L3_RD_BRTCH1) : L3_RD_BRTCH3) : L3_EXE;
       L3_DONE:       n_state = L4_RST;
 
       //======================= Layer 4 ===========================================================================================================
       L4_RST:        n_state = L4_RD_BRTCH1;
       L4_RD_BRTCH1:  n_state = (counter == 30) ? L4_EXE : L4_RD_BRTCH1;
-      L4_EXE:        n_state = (counter == 1) ? L4_SUM : L4_EXE;
+      L4_EXE:        n_state = (counter == 2) ? L4_SUM : L4_EXE;
       L4_SUM:        n_state = L4_OUT;
       L4_OUT:        n_state = (psum_temp_indx == 99) ? L5_RST : L4_RD_BRTCH1;
               
@@ -233,7 +235,7 @@ module cnn(clk,
       L5_RST:        n_state = L5_RD_BRTCH1;
       L5_RD_BRTCH1:  n_state = (counter == 21) ? L5_RD_BRTCH2 : L5_RD_BRTCH1;
       L5_RD_BRTCH2:  n_state = (counter == 21) ? L5_EXE : L5_RD_BRTCH2;
-      L5_EXE:        n_state = (counter == 1)  ? L5_SUM : L5_EXE;
+      L5_EXE:        n_state = (counter == 2)  ? L5_SUM : L5_EXE;
       L5_SUM:        n_state = L5_OUT;
       L5_OUT:        n_state = (psum_temp_indx == 46) ? DONE : L5_RD_BRTCH1; // mode = 1: number, mode = 0: letter
       DONE:          n_state = (ready) ? IDLE : DONE;
@@ -435,10 +437,9 @@ module cnn(clk,
   assign BRAM_IF1_WE = (state == L2_WRITE_TEMP) ? 4'b1111 : 4'b0000;
   assign BRAM_IF2_WE = (state == L1_WRITE_TEMP) ? 4'b1111 : 4'b0000;
 
-  assign shift_sram_en = (state == L1_READ_TILE6 || state == L1_READ_TILE8 || state == L1_EXE1 || state == L1_EXE2 || 
-                         (channel_cnt == 5 && (state == L2_READ_TILE6 || state == L2_EXE)));
+  assign shift_sram_en = (state == L1_EXE1 || state == L1_EXE2 || (channel_cnt == 5 && state == L2_EXE)); // pipeline O
 
-  assign sft_mx_pl_reg_en = (state == L1_MX_PL1 || state == L1_MX_PL2 || state == L2_MX_PL);
+  assign sft_mx_pl_reg_en = (state == L1_MX_PL1 || state == L1_MX_PL2 || state == L2_MX_PL); 
   // ================================== enable signal end =====================================================================================================================
 
 
@@ -453,18 +454,18 @@ module cnn(clk,
 
   assign L1_counter_flag = (state == L1_RD_BRTCH1 && counter <= 11) || (state == L1_RD_BRTCH2 && counter <= 36) || (state == L1_RD_BRTCH3 && counter <= 11) ||
                            (state == L1_READ24 && counter <= 5) || ((state == L1_MX_PL1 || state == L1_MX_PL2) && counter <= 4) ||
-                           (state == L1_WRITE_TEMP && counter <= 1) || ((state == L1_EXE1 || state == L1_EXE2) && counter <= 1);
+                           (state == L1_WRITE_TEMP && counter <= 1) || ((state == L1_EXE1 || state == L1_EXE2) && counter <= 2);
                            
   assign L2_counter_flag = (state == L2_RD_BRTCH1 && counter <= 35) || (state == L2_RD_BRTCH2 && counter <= 12) || (state == L2_RD_BRTCH3 && counter <= 35) ||
                            (state == L2_READ12 && counter <= 11) || (state == L2_MX_PL && counter <= 6) ||
-                           (state == L2_EXE && counter <= 1) || (state == L2_WRITE_TEMP && counter <= 0);
+                           (state == L2_EXE && counter <= 2) || (state == L2_WRITE_TEMP && counter <= 0);
   
   assign L3_counter_flag = (state == L3_RD_BRTCH1 && counter <= 24) || (state == L3_RD_BRTCH2 && counter <= 23) || (state == L3_RD_BRTCH3 && counter <= 49) || 
-                           (state == L3_EXE && counter <= 0);
+                           (state == L3_EXE && counter <= 1);
                            
-  assign L4_counter_flag = (state == L4_RD_BRTCH1 && counter <= 29) || (state == L4_EXE && counter <= 0);
+  assign L4_counter_flag = (state == L4_RD_BRTCH1 && counter <= 29) || (state == L4_EXE && counter <= 1);
   
-  assign L5_counter_flag = (state == L5_RD_BRTCH1 && counter <= 20) || (state == L5_RD_BRTCH2 && counter <= 20) || (state == L5_EXE && counter <= 0);
+  assign L5_counter_flag = (state == L5_RD_BRTCH1 && counter <= 20) || (state == L5_RD_BRTCH2 && counter <= 20) || (state == L5_EXE && counter <= 1);
 
   always @(posedge clk or posedge rst) begin
     if(rst) counter <= 0;
@@ -651,6 +652,7 @@ module cnn(clk,
 
 
   // ============================================== psum control =========================================================================================
+  // ============================= pipeline X
   always @(posedge clk or posedge rst) begin
     if(rst) for(i = 0; i < 8; i=i+1) psum_in[i] <= 0;
     else begin 
@@ -677,12 +679,13 @@ module cnn(clk,
       end
     end
   end
-
+  // ============================= pipeline X
   // psum_temp
+  // ============================= pipeline O
   always @(posedge clk or posedge rst) begin
     if(rst) psum_temp_indx <= 0;
     else begin
-      if(state == L2_READ_TILE6 || state == L2_EXE) begin
+      if(state == L2_EXE) begin
         if(psum_temp_indx == 99) psum_temp_indx <= 0;
         else psum_temp_indx <= psum_temp_indx + 1;
       end
@@ -711,7 +714,7 @@ module cnn(clk,
             psum_temp[i][j] <= 0;
         end
       end
-      else if(state == L2_READ_TILE6 || state == L2_EXE || (counter == 0 && ((state == L3_RD_BRTCH1 && channel_cnt != 0) || state == L3_RD_BRTCH3)) || state == L3_DONE) 
+      else if(state == L2_EXE || (counter == 0 && ((state == L3_RD_BRTCH1 && channel_cnt != 0) || state == L3_RD_BRTCH3)) || state == L3_DONE) 
         for(i = 0; i < 8; i=i+1) psum_temp[i][psum_temp_indx] <= pe_out[i];
       else if(state == L4_OUT) psum_temp[0][psum_temp_indx] <= pe_out_sum_a_quan;
       else if(state == L5_OUT) begin
@@ -720,6 +723,7 @@ module cnn(clk,
       end
     end
   end
+  // ============================= pipeline O
   // =====================================================================================================================================================
 
   
