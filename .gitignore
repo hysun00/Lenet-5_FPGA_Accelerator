@@ -10,3 +10,4 @@ src/cnn_old.v
 train/gzip
 train/test
 train/trainn
+.vscode
