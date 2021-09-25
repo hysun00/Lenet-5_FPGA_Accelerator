@@ -201,11 +201,11 @@ module cnn_tb;
   always #(`CYCLE/2) clk = ~clk;
 
   initial begin
-    $readmemh("../Weight/letter_and_number/out_conv1_32.hex", bram_w1.mem);
-    $readmemh("../Weight/letter_and_number/out_conv2_32.hex", bram_w2.mem);
-    $readmemh("../Weight/letter_and_number/out_conv3_32.hex", bram_w3.mem);
-    $readmemh("../Weight/letter_and_number/out_fc1_32.hex", bram_w4.mem);
-    $readmemh("../Weight/letter_and_number/out_fc2_32.hex", bram_w5.mem);
+    $readmemh("../Weight/out_conv1_32.hex", bram_w1.mem);
+    $readmemh("../Weight/out_conv2_32.hex", bram_w2.mem);
+    $readmemh("../Weight/out_conv3_32.hex", bram_w3.mem);
+    $readmemh("../Weight/out_fc1_32.hex", bram_w4.mem);
+    $readmemh("../Weight/out_fc2_32.hex", bram_w5.mem);
     $readmemh("./in_32.hex", bram_if1.mem);
     // $readmemh("../weight/number/number_conv1_32_out.hex", GOLDEN, 0);
     // $readmemh("../weight/number/number_fc2_out.hex", GOLDEN, 0);
