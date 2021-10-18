@@ -58,26 +58,27 @@ This repository is about our undergraduate graduation project from NCKUEE, imple
 ### Utilization
 |Resource              |Utilization  |Avaliable    |Utilization % |
 |  -----               | -----       | -----       | -----        |
-|LUT     	           |37972        |53200        |71.38         |
+|LUT     	           |38690        |53200        |72.73         |
 |LUTRAM                |1883         |17400        |10.82         |
-|FF                    |42834        |106400       |40.26         |
+|FF                    |43396        |106400       |40.79         |
 |BRAM   	           |30           |140          |21.43         |
 |DSP                   |200          |220          |90.91         |
 |BUFG                  |2            |32           |6.25          |
 
-<img src="/Image/Utilization_graph.png"/>
 
 ### Power
-<img src="/Image/power.png"/>
+|   	           |Total On-Chip Power(W)   |Dynamic Power(W)  |Device Static Power(W)    % |
+|  -----           | -----                   | -----            | -----                      |
+|Software          |1.733                    |1.587             |0.145                       |
+
 
 ## Performance
-### Accuracy
-        Number recognition accuracy: 98.34 %
-        Letter recognition accuracy: 93.14 %
-> From DLA_Accuracy_test.ipynb
-### FPS
-        Clock rate: 70 MHz
-        FPS: 805.64
+|   	           |Accuracy(%)   |Average Inference time   |FPS       % |
+|  -----           | -----        | -----                   | -----      |
+|Software          |85.8          |80.86                    |12          |
+|Hardware          |85.6          |0.50                     |1991        |
+
+## Issue
 
 
 ## References
@@ -89,8 +90,9 @@ This repository is about our undergraduate graduation project from NCKUEE, imple
 * [6] NCKU Courses:
     - AI-ON-CHIP FOR MACHINE LEARNING AND INFERENCE -- Lectured by Professor Chen Chung-Ho
     - DEEP LEARNING INTEGRATED CIRCUIT DESIGN AND ACCELERATION -- Lectured by Professor Lin Ing-Chao
-* [7] LeCun, Yann  (1998), "Gradient-Based Learning Applied to Document Recognition"
-* [8] Dai Rongshi  (2019), "Accelerator Implementation of Lenet-5 Convolution Neural Network Based on FPGA with HLS"
-* [9] Yu-Hsin Chen (2017), "Eyeriss: An Energy-Efficient Reconfigurable Accelerator for Deep Convolutional Neural Networks"
-* [10] Vivienne Sze, Yu-Hsin Chen, Tien-Ju Yang, Joel S. Emer (2017), "Efficient Processing of Deep Neural Networks: A Tutorial and Survey"
-* [11] David Gschwend (2016), "ZynqNet: An FPGA-Accelerated Embedded Convolutional Neural Network"
+* [7]	Y. Lecun, L. Bottou, Y. Bengio and P. Haffner, "Gradient-based learning applied to document recognition," in Proceedings of the IEEE, vol. 86, no. 11, pp. 2278-2324, Nov. 1998.
+* [8]	Y.-H. Chen, T. Krishna, J. Emer, and V. Sze, “Eyeriss: An energy-efficient reconfigurable accelerator for deep convolutional neural networks,” IEEE J. Solid-State Circuits, vol. 51, no. 1, pp. 127–138, Jan. 2017.
+* [9] 	V. Sze, Y. Chen, T. Yang and J. S. Emer, "Efficient Processing of Deep Neural Networks: A Tutorial and Survey," in Proceedings of the IEEE, vol. 105, no. 12, pp. 2295-2329, Dec. 2017.
+* [10] 	Amir Gholami, Sehoon Kim, Zhen Dong, Zhewei Yao, Michael W. Mahoney, Kurt Keutzer, "A Survey of Quantization Methods for Efficient Neural Network Inference", University of California, Berkeley,  Jun. 2021. 
+* [11] 	Gregory Cohen, Saeed Afshar, Jonathan Tapson, André van Schaik, ''EMNIST: an extension of MNIST to handwritten letters'', The MARCS Institute for Brain, Behaviour and Development Western Sydney University,  Mar. 2017.
+
