@@ -55,27 +55,27 @@ This repository is about our undergraduate graduation project from NCKUEE, imple
 
 ## PYNQ-Z2 board
 ### Utilization
-|Resource              |Utilization  |Avaliable    |Utilization(%) |
-|  -----               | -----       | -----       | -----         |
-|LUT     	           |38690        |53200        |72.73          |
-|LUTRAM                |1883         |17400        |10.82          |
-|FF                    |43396        |106400       |40.79          |
-|BRAM   	           |30           |140          |21.43          |
-|DSP                   |200          |220          |90.91          |
-|BUFG                  |2            |32           |6.25           |
+| Resource | Utilization | Avaliable | Utilization(%) |
+|:--------:|:-----------:|:---------:|:--------------:|
+|   LUT    |    38690    |   53200   |     72.73      |
+|  LUTRAM  |    1883     |   17400   |     10.82      |
+|    FF    |    43396    |  106400   |     40.79      |
+|   BRAM   |     30      |    140    |     21.43      |
+|   DSP    |     200     |    220    |     90.91      |
+|   BUFG   |      2      |    32     |      6.25      |
 
 
 ### Power
-|   	           |Total On-Chip Power(W)   |Dynamic Power(W)  |Device Static Power(W)      |
-|  -----           | -----                   | -----            | -----                      |
-|Value             |1.733                    |1.587             |0.145                       |
+|       | Total On-Chip Power(W) | Dynamic Power(W) | Device Static Power(W) |
+|:-----:|:----------------------:|:----------------:|:----------------------:|
+| Value |         1.733          |      1.587       |         0.145          |
 
 
 ## Performance
-|   	           |Accuracy(%)   |Average Inference time(ms)   |FPS         |
-|  -----           | -----        | -----                       | -----      |
-|Software          |85.8          |80.86                        |12          |
-|Hardware          |85.6          |0.50                         |1991        |
+|          | Accuracy(%) | Average Inference time(ms) | FPS  |
+|:--------:|:-----------:|:--------------------------:|:----:|
+| Software |    85.8     |           80.86            |  12  |
+| Hardware |    85.6     |            0.50            | 1991 |
 
 ## Issue
 
