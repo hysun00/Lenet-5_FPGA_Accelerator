@@ -38,7 +38,6 @@ This repository is about our undergraduate graduation project from NCKUEE, imple
 
 <img src="/Image/Lenet-5.png"/>
 
-> In layer 5, there are 27 nodes for alphabets recognition.
 
 ## Data format
 * Input image : 8 bits integer
@@ -49,7 +48,7 @@ This repository is about our undergraduate graduation project from NCKUEE, imple
 
 > **Two** feature BRAMs for **ifmp/ofmp** storage & **Five** weight BRAMs for **layer 1~5** weight storage.
 
-<img src="/Image/PE_architecture.png"/>
+<img src="/Image/PE_architecture.jpg"/>
 
 
 
@@ -69,7 +68,7 @@ This repository is about our undergraduate graduation project from NCKUEE, imple
 ### Power
 |   	           |Total On-Chip Power(W)   |Dynamic Power(W)  |Device Static Power(W)    % |
 |  -----           | -----                   | -----            | -----                      |
-|Software          |1.733                    |1.587             |0.145                       |
+|Value             |1.733                    |1.587             |0.145                       |
 
 
 ## Performance
@@ -79,6 +78,7 @@ This repository is about our undergraduate graduation project from NCKUEE, imple
 |Hardware          |85.6          |0.50                     |1991        |
 
 ## Issue
+
 
 
 ## References
