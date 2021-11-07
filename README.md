@@ -33,6 +33,13 @@ This repository is about our undergraduate graduation project from NCKUEE, imple
 
 > **NOTE :** You should execute server.py first or you will get connection error and you should change the path of Overlay to where you put your bitstream file.
 
+## Performance
+|          | Accuracy(%) | Average Inference time(ms) | FPS  |
+|:--------:|:-----------:|:--------------------------:|:----:|
+| Software |    85.8     |           80.86            |  12  |
+| Hardware |    85.6     |            0.50            | 1991 |
+> Increase the frame rate from 12 FPS to 1991 FPS
+
 ## Lenet-5 Architecture
 <img src="/Image/Lenet-5_architecture.png"/>
 
@@ -70,12 +77,6 @@ This repository is about our undergraduate graduation project from NCKUEE, imple
 |:-----:|:----------------------:|:----------------:|:----------------------:|
 | Value |         1.733          |      1.587       |         0.145          |
 
-
-## Performance
-|          | Accuracy(%) | Average Inference time(ms) | FPS  |
-|:--------:|:-----------:|:--------------------------:|:----:|
-| Software |    85.8     |           80.86            |  12  |
-| Hardware |    85.6     |            0.50            | 1991 |
 
 ## Issue
 
